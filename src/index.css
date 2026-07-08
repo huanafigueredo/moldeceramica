@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-terracotta-50: #fdf5f2;
+  --color-terracotta-100: #fbebe5;
+  --color-terracotta-150: #f9e1d8;
+  --color-terracotta-200: #f6d8cb;
+  --color-terracotta-300: #e0a37e;
+  --color-terracotta-400: #c97a4a;
+  --color-terracotta-500: #8e4a23;
+  --color-terracotta-600: #7d3f1c;
+  --color-terracotta-700: #683216;
+  --color-clay-50: #fdfaf6;
+  --color-clay-100: #f5efe8;
+  --color-clay-200: #e8ded2;
+  --color-clay-500: #8c8177;
+  --color-clay-800: #4a423b;
+  --color-clay-900: #3e3630;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-clay-50);
+    color: var(--color-clay-900);
+    font-family: var(--font-sans);
+  }
+}
+
+/* Custom scrollbar to match the design */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-clay-50);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-terracotta-200);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terracotta-500);
+}
+
+/* Page rules for 1:1 scale printing */
+@media print {
+  body {
+    background: white !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-parent-clean {
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+  }
+  .print-container {
+    display: block !important;
+    background: white !important;
+  }
+  .print-page {
+    page-break-after: always;
+    break-after: page;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 10mm;
+    box-sizing: border-box;
+    position: relative;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden;
+  }
+}
+
