@@ -34,6 +34,17 @@ export default function PrintTiledLayout({
     </svg>
   );
 
+  // Render a 1cm calibration square so the user can verify with a ruler that
+  // the printer didn't rescale the page (e.g. "fit to page" silently shrinking it).
+  const renderCalibrationSquare = () => (
+    <div className="flex items-center gap-1.5 shrink-0">
+      <div className="border-2 border-black bg-white" style={{ width: '1cm', height: '1cm' }} />
+      <span className="text-[6.5px] font-mono text-gray-500 leading-tight max-w-[62px] uppercase tracking-tight">
+        Meça: deve medir exatamente 1cm
+      </span>
+    </div>
+  );
+
   const handlePrintTrigger = () => {
     window.print();
   };
@@ -109,6 +120,7 @@ export default function PrintTiledLayout({
             <p className="text-[11px] text-clay-900/60 font-sans leading-relaxed">
               Clique no botão <b>Imprimir Agora</b> acima. No painel de impressão, escolha a sua impressora ou mude o destino para <b>Salvar como PDF</b>.
               <span className="block mt-1.5 text-terracotta-600 font-semibold text-[10px]">⚠️ DEFINA A ESCALA EM 100% (SEM AJUSTES).</span>
+              <span className="block mt-1.5 text-clay-900/60 font-semibold text-[10px]">📏 Depois de imprimir, meça o quadrado de calibração no topo da folha com uma régua — ele deve ter exatamente 1cm de lado.</span>
             </p>
           </div>
 
@@ -165,8 +177,9 @@ export default function PrintTiledLayout({
                   {renderCrosshair('bottom-2 right-2')}
  
                    {/* Top Header Label */}
-                   <div className="flex justify-between items-center text-[9px] font-mono border-b border-gray-200 pb-1 text-gray-500 select-none">
+                   <div className="flex justify-between items-center gap-2 text-[9px] font-mono border-b border-gray-200 pb-1 text-gray-500 select-none">
                      <span>CeraMold • Molde de Precisão 1:1</span>
+                     {renderCalibrationSquare()}
                      <span>PÁGINA {pageIndex} de {totalPages} (C:{c+1}, L:{r+1})</span>
                    </div>
  
@@ -244,8 +257,9 @@ export default function PrintTiledLayout({
                 {renderCrosshair('bottom-2 right-2')}
 
                 {/* Top Label */}
-                <div className="flex justify-between items-center text-[9px] font-mono border-b border-gray-300 pb-1 text-gray-500">
+                <div className="flex justify-between items-center gap-2 text-[9px] font-mono border-b border-gray-300 pb-1 text-gray-500">
                   <span>CeraMold • Molde de Precisão 1:1</span>
+                  {renderCalibrationSquare()}
                   <span>FOLHA {pageIndex} de {totalPages} (C:{c+1}, L:{r+1})</span>
                 </div>
 
