@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Sparkles, Compass, AlertTriangle, ArrowRight, RotateCw, ExternalLink, Globe } from 'lucide-react';
+import { Search, Sparkles, Compass, AlertTriangle, ArrowRight, RotateCw } from 'lucide-react';
 import { ShapeType } from '../types';
+import { getOfflineMoldSuggestions } from '../utils/moldLibrary';
 
 interface AITemplateFinderProps {
   onSelectModel: (
@@ -48,38 +49,18 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResult[] | null>(null);
-  const [isFallback, setIsFallback] = useState(false);
-  const [warning, setWarning] = useState<string | null>(null);
 
-  const handleSearch = async (searchQuery: string) => {
+  const handleSearch = (searchQuery: string) => {
     if (!searchQuery.trim()) return;
     setLoading(true);
     setError(null);
     setResults(null);
-    setIsFallback(false);
-    setWarning(null);
 
     try {
-      const response = await fetch("/api/search-molds", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Houve um erro desconhecido.");
-      }
-
-      setResults(data.results);
-      if (data.isFallback) {
-        setIsFallback(true);
-        setWarning(data.warning);
-      }
+      setResults(getOfflineMoldSuggestions(searchQuery));
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Erro de conexão com o servidor.");
+      setError("Não foi possível gerar sugestões para essa busca.");
     } finally {
       setLoading(false);
     }
@@ -210,9 +191,9 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
       <div className="bg-white rounded-3xl border border-terracotta-100 p-8 md:p-12 shadow-sm">
         <div className="max-w-xl mx-auto space-y-6">
           <div className="text-center space-y-3">
-            <h2 className="text-2xl md:text-3xl font-serif font-extrabold text-clay-900 tracking-tight">Biblioteca Inteligente</h2>
+            <h2 className="text-2xl md:text-3xl font-serif font-extrabold text-clay-900 tracking-tight">Biblioteca de Referência</h2>
             <p className="text-sm text-clay-900/50 max-w-sm mx-auto leading-relaxed">
-              Pesquise qualquer peça e nós calculamos as medidas técnicas baseadas em referências mundiais.
+              Pesquise por peças comuns e carregamos automaticamente medidas de referência prontas para o gerador.
             </p>
           </div>
 
@@ -266,19 +247,8 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
         <div className="bg-red-50 border border-red-100 rounded-2xl p-5 max-w-2xl mx-auto flex gap-3.5 items-start">
           <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
           <div className="space-y-1.5">
-            <h4 className="text-sm font-bold text-red-950">Não foi possível buscar na internet</h4>
+            <h4 className="text-sm font-bold text-red-950">Não foi possível gerar sugestões</h4>
             <p className="text-xs text-red-900/70 leading-relaxed">{error}</p>
-          </div>
-        </div>
-      )}
-
-      {/* FALLBACK WARNING DISPLAY */}
-      {isFallback && warning && (
-        <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 max-w-2xl mx-auto flex gap-3.5 items-start shadow-sm">
-          <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
-          <div className="space-y-1">
-            <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wider">Modo de Consulta Offline Ativo</h4>
-            <p className="text-xs text-amber-900/70 leading-relaxed font-sans">{warning}</p>
           </div>
         </div>
       )}
@@ -292,9 +262,9 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
             <Compass className="w-7 h-7 text-terracotta-600 animate-pulse" />
           </div>
           <div className="space-y-2">
-            <h4 className="text-sm font-bold text-clay-900">Buscando na Web & Calculando Moldes...</h4>
+            <h4 className="text-sm font-bold text-clay-900">Calculando Moldes...</h4>
             <p className="text-xs text-clay-900/50 max-w-md mx-auto leading-relaxed">
-              Consultando sites especializados e catálogos para extrair as medidas perfeitas recomendadas de <b>"{query}"</b>.
+              Buscando na biblioteca de referência as medidas mais próximas de <b>"{query}"</b>.
             </p>
           </div>
         </div>
@@ -306,10 +276,6 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
           <div className="flex items-center justify-between px-2">
             <span className="text-xs font-bold text-clay-900/40 uppercase tracking-widest">
               Encontramos 5 Modelos de Referência:
-            </span>
-            <span className="text-[10px] text-clay-900/50 font-mono flex items-center gap-1">
-              <Globe className={`w-3.5 h-3.5 ${isFallback ? 'text-amber-500' : 'text-emerald-500'}`} />
-              {isFallback ? 'Biblioteca Offline' : 'BuscaGrounding Online'}
             </span>
           </div>
 

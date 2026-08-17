@@ -2,7 +2,6 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
-import { searchMolds } from "./src/server/searchMolds";
 
 dotenv.config();
 
@@ -10,18 +9,6 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-
-// API: Search models with Google Search grounding and Gemini 3.1 Flash Lite
-app.post("/api/search-molds", async (req, res) => {
-  const { query } = req.body;
-
-  if (!query) {
-    return res.status(400).json({ error: "O termo de busca é obrigatório." });
-  }
-
-  const result = await searchMolds(query);
-  res.json(result);
-});
 
 // Setup Vite or Static serving
 async function startServer() {

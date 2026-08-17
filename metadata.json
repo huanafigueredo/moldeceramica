@@ -2,5 +2,5 @@
   "name": "CeraMold",
   "description": "Calculadora de retração de argila e gerador de moldes parametrizados para ceramistas.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }
