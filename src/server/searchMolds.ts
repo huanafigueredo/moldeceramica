@@ -1,5 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
 export interface SearchMoldsResult {
   results: any[];
   isFallback: boolean;
@@ -202,6 +200,11 @@ export async function searchMolds(query: string): Promise<SearchMoldsResult> {
   }
 
   try {
+    // Loaded dynamically so a missing/misconfigured GEMINI_API_KEY (the
+    // common case on a fresh deploy) never pulls this SDK into the module's
+    // cold-start path — the early return above already handles that case.
+    const { GoogleGenAI, Type } = await import("@google/genai");
+
     const ai = new GoogleGenAI({
       apiKey,
       httpOptions: {
