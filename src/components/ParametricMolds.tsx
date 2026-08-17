@@ -190,7 +190,7 @@ export default function ParametricMolds({
             <div>
               <div className="text-xs font-bold font-sans">Tigela / Bowl</div>
               <div className={`text-[10px] ${shapeType === 'bowl' ? 'text-terracotta-100' : 'text-clay-900/50'}`}>
-                Parede curva, montada em bandas
+                Parede curva — de tigela funda a prato fundo
               </div>
             </div>
           </button>
@@ -1197,6 +1197,23 @@ export default function ParametricMolds({
 
         {shapeType === 'bowl' && (
           <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => onChangeParams({ ...params, topDiameter: 18, bottomDiameter: 8, height: 9, curvature: 60 })}
+                className="py-2.5 px-3 bg-white/60 hover:bg-white border border-terracotta-100 hover:border-terracotta-300 rounded-xl text-[11px] font-bold text-clay-900/70 transition text-left"
+              >
+                🥣 Tigela Funda
+                <div className="text-[9px] font-normal text-clay-900/40">Alta, corpo redondo</div>
+              </button>
+              <button
+                onClick={() => onChangeParams({ ...params, topDiameter: 26, bottomDiameter: 14, height: 4.5, curvature: 70 })}
+                className="py-2.5 px-3 bg-white/60 hover:bg-white border border-terracotta-100 hover:border-terracotta-300 rounded-xl text-[11px] font-bold text-clay-900/70 transition text-left"
+              >
+                🍜 Prato Fundo
+                <div className="text-[9px] font-normal text-clay-900/40">Larga e rasa, tipo prato de sopa</div>
+              </button>
+            </div>
+
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-1 h-4 bg-terracotta-400 rounded-full" />
