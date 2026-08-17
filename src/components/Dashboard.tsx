@@ -1,15 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams } from '../types';
 import RetractionCalculator from './RetractionCalculator';
 import ParametricMolds from './ParametricMolds';
 import MoldVisualizer from './MoldVisualizer';
-import VisualConverter from './VisualConverter';
 import PrintTiledLayout from './PrintTiledLayout';
 import AITemplateFinder from './AITemplateFinder';
-import { Flame, Layers, Wand2, Calculator, Info, Check, Sparkles, Compass, Grid, ArrowRight } from 'lucide-react';
+import AppHeader from './AppHeader';
+import { Flame, Layers, Calculator, Info, Compass, ArrowRight } from 'lucide-react';
+
+const PATH_TO_TAB: Record<string, 'overview' | 'generator' | 'search' | 'calculator'> = {
+  '/': 'overview',
+  '/moldes': 'generator',
+  '/biblioteca': 'search',
+  '/calculadoras': 'calculator',
+};
+const TAB_TO_PATH: Record<string, string> = {
+  overview: '/',
+  generator: '/moldes',
+  search: '/biblioteca',
+  calculator: '/calculadoras',
+};
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'generator' | 'converter' | 'calculator' | 'search'>('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = PATH_TO_TAB[location.pathname] || 'overview';
+  const goToTab = (tab: keyof typeof TAB_TO_PATH) => navigate(TAB_TO_PATH[tab]);
 
   // Tabs are kept mounted (hidden via CSS) once visited instead of being torn
   // down, so switching away and back doesn't wipe out in-progress work (photo
@@ -147,30 +164,6 @@ export default function Dashboard() {
     }
   };
 
-  // Called when dimensions are extracted from visual photo upload
-  const handleDimensionsExtracted = (topDia: number, botDia: number, vertH: number) => {
-    // Set the shape to 'cone' or 'cylinder' based on values
-    if (Math.abs(topDia - botDia) < 0.2) {
-      setShapeType('cylinder');
-      setCylinderParams((p) => ({
-        ...p,
-        desiredDiameter: topDia,
-        desiredHeight: vertH,
-      }));
-    } else {
-      setShapeType('cone');
-      setConeParams((p) => ({
-        ...p,
-        topDiameter: topDia,
-        bottomDiameter: botDia,
-        height: vertH,
-      }));
-    }
-    // Switch to mold generator view and scroll smoothly to the workspace
-    setActiveTab('generator');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   // Called when an AI searched template is selected
   const handleSelectModel = (selectedShape: ShapeType, selectedParams: any) => {
     // Normalize shape type to avoid casing or spacing issues
@@ -188,105 +181,17 @@ export default function Dashboard() {
       setBoxParams(selectedParams);
     }
     // Switch to mold generator view and scroll smoothly to the workspace
-    setActiveTab('generator');
+    goToTab('generator');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-clay-50 text-clay-900 selection:bg-terracotta-100 flex flex-col justify-between print-parent-clean">
       
-      {/* HEADER BAR */}
-      <header className="no-print sticky top-0 bg-white/70 backdrop-blur-md border-b border-terracotta-100/30 z-40 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-terracotta-500 flex items-center justify-center text-white shadow-sm">
-              <Flame className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-serif text-lg font-bold tracking-tight text-clay-900">
-                CeraMold <span className="text-[10px] font-sans font-medium px-2 py-0.5 bg-terracotta-50 text-terracotta-600 rounded-full border border-terracotta-100">v1.0</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center gap-6">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-clay-50 border border-terracotta-100/50 rounded-full">
-              <span className="text-[10px] text-clay-900/40 font-bold uppercase tracking-wider">Retração:</span>
-              <span className="text-xs font-mono font-bold text-terracotta-600">
-                {globalShrinkage.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader globalShrinkage={globalShrinkage} />
 
       {/* CORE WORKSPACE CONTENT */}
-      <main className="no-print flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        
-        {/* SUB NAVIGATION TABS */}
-        <div className="flex bg-white/50 p-1 rounded-2xl border border-terracotta-100/50 mb-8 gap-1 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all whitespace-nowrap ${
-              activeTab === 'overview'
-                ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100'
-                : 'text-clay-900/40 hover:text-clay-900/70'
-            }`}
-          >
-            <Grid className="w-4 h-4" />
-            Dashboard
-          </button>
-
-          <button
-            onClick={() => setActiveTab('generator')}
-            className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all whitespace-nowrap ${
-              activeTab === 'generator'
-                ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100'
-                : 'text-clay-900/40 hover:text-clay-900/70'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            Moldes
-          </button>
-
-          <button
-            onClick={() => setActiveTab('converter')}
-            className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all relative whitespace-nowrap ${
-              activeTab === 'converter'
-                ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100'
-                : 'text-clay-900/40 hover:text-clay-900/70'
-            }`}
-          >
-            <Wand2 className="w-4 h-4" />
-            Foto → Molde
-            <Sparkles className="w-2.5 h-2.5 text-amber-500" />
-          </button>
-
-          <button
-            onClick={() => setActiveTab('search')}
-            className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all whitespace-nowrap ${
-              activeTab === 'search'
-                ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100'
-                : 'text-clay-900/40 hover:text-clay-900/70'
-            }`}
-          >
-            <Compass className="w-4 h-4" />
-            Biblioteca
-          </button>
-
-          <button
-            onClick={() => setActiveTab('calculator')}
-            className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all whitespace-nowrap ${
-              activeTab === 'calculator'
-                ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100'
-                : 'text-clay-900/40 hover:text-clay-900/70'
-            }`}
-          >
-            <Calculator className="w-4 h-4" />
-            Calculadoras
-          </button>
-        </div>
-
+      <main className="no-print flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 w-full">
         {/* TAB WORKSPACES */}
         <div className="transition-all duration-300">
                  {/* TAB 0: OVERVIEW BENTO GRID */}
@@ -339,7 +244,7 @@ export default function Dashboard() {
                 
                 {/* CARD 1: PARAMETRIC MOLDS */}
                 <button 
-                  onClick={() => setActiveTab('generator')}
+                  onClick={() => goToTab('generator')}
                   className="lg:col-span-2 group bg-white border border-terracotta-100 rounded-2xl p-8 shadow-sm hover:shadow-md hover:border-terracotta-300 transition-all text-left flex flex-col justify-between h-64"
                 >
                   <div>
@@ -356,26 +261,9 @@ export default function Dashboard() {
                   </div>
                 </button>
 
-                {/* CARD 2: PHOTO SCAN */}
-                <button 
-                  onClick={() => setActiveTab('converter')}
-                  className="group bg-white border border-terracotta-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-terracotta-300 transition-all text-left flex flex-col justify-between h-64"
-                >
-                  <div>
-                    <div className="p-3 bg-amber-50 rounded-xl text-amber-500 w-fit mb-6">
-                      <Wand2 className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-serif text-lg font-bold text-clay-900 mb-2">Foto → Molde</h3>
-                    <p className="text-[11px] text-clay-900/50 leading-relaxed">
-                      Transforme fotos de perfil em moldes planificados 1:1.
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-amber-500 group-hover:translate-x-1 transition-transform" />
-                </button>
-
                 {/* CARD 3: TEMPLATE FINDER */}
                 <button 
-                  onClick={() => setActiveTab('search')}
+                  onClick={() => goToTab('search')}
                   className="group bg-white border border-terracotta-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-terracotta-300 transition-all text-left flex flex-col justify-between h-64"
                 >
                   <div>
@@ -392,7 +280,7 @@ export default function Dashboard() {
 
                 {/* CARD 4: CALCULATOR */}
                 <button 
-                  onClick={() => setActiveTab('calculator')}
+                  onClick={() => goToTab('calculator')}
                   className="group bg-white border border-terracotta-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-terracotta-300 transition-all text-left flex flex-col justify-between h-64"
                 >
                   <div>
@@ -420,7 +308,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-1 group bg-terracotta-500 rounded-2xl p-6 shadow-sm flex flex-col justify-between h-auto min-h-[120px] text-white">
+                <div className="lg:col-span-2 group bg-terracotta-500 rounded-2xl p-6 shadow-sm flex flex-col justify-between h-auto min-h-[120px] text-white">
                   <div className="text-[10px] font-bold uppercase tracking-widest opacity-70">Status do Motor</div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -434,8 +322,20 @@ export default function Dashboard() {
           {/* TAB 1: PARAMETRIC MOLDS AND VISUAL PREVIEW */}
           {visitedTabs.generator && (
             <div className={activeTab === 'generator' ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 items-start' : 'hidden'}>
+              {/* Scaled preview rendering canvas - 7 cols. Shown first (order-1) so
+                  the live result is visible immediately on narrow screens, where the
+                  grid stacks to a single column; back to the right on desktop (lg:order-2). */}
+              <div className="order-1 lg:order-2 lg:col-span-7 h-full">
+                <MoldVisualizer
+                  shapeType={shapeType}
+                  params={getActiveParams()}
+                  onChangeParams={handleUpdateParams}
+                  onPrintRequest={(svg, bbox) => setPrintRequest({ svgString: svg, boundingBox: bbox })}
+                />
+              </div>
+
               {/* Parameter Editor inputs - 5 cols */}
-              <div className="lg:col-span-5 h-full">
+              <div className="order-2 lg:order-1 lg:col-span-5 h-full">
                 <ParametricMolds
                   shapeType={shapeType}
                   setShapeType={setShapeType}
@@ -444,26 +344,6 @@ export default function Dashboard() {
                   onChangeParams={handleUpdateParams}
                 />
               </div>
-
-              {/* Scaled preview rendering canvas - 7 cols */}
-              <div className="lg:col-span-7 h-full">
-                <MoldVisualizer
-                  shapeType={shapeType}
-                  params={getActiveParams()}
-                  onChangeParams={handleUpdateParams}
-                  onPrintRequest={(svg, bbox) => setPrintRequest({ svgString: svg, boundingBox: bbox })}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: VISUAL PHOTO SCANNER */}
-          {visitedTabs.converter && (
-            <div className={activeTab === 'converter' ? '' : 'hidden'}>
-              <VisualConverter
-                globalShrinkage={globalShrinkage}
-                onDimensionsExtracted={handleDimensionsExtracted}
-              />
             </div>
           )}
 

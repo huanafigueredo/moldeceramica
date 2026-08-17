@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BookMarked, ChevronRight, Save, FolderOpen, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useAdminSession } from '../lib/adminAuth';
 import { ShapeType } from '../types';
 
 interface SavedMoldRow {
@@ -27,6 +28,7 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
 };
 
 export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMoldsPanelProps) {
+  const { isAdmin } = useAdminSession();
   const [expanded, setExpanded] = useState(false);
   const [molds, setMolds] = useState<SavedMoldRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,27 +103,29 @@ export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMold
 
       {expanded && (
         <div className="p-4 pt-0 space-y-4 animate-fadeIn">
-          {/* Save current mold */}
-          <div className="flex gap-2 pt-1">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave();
-              }}
-              placeholder="Nome para este molde..."
-              className="flex-1 h-9 px-3 bg-clay-50 border border-terracotta-100 focus:border-terracotta-500 focus:outline-none rounded-xl text-xs transition"
-            />
-            <button
-              onClick={handleSave}
-              disabled={saving || !name.trim()}
-              className="shrink-0 h-9 px-3 bg-terracotta-500 hover:bg-terracotta-600 disabled:opacity-50 text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition"
-            >
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              Salvar
-            </button>
-          </div>
+          {/* Save current mold — admin only, everyone else can browse/load */}
+          {isAdmin && (
+            <div className="flex gap-2 pt-1">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSave();
+                }}
+                placeholder="Nome para este molde..."
+                className="flex-1 h-9 px-3 bg-clay-50 border border-terracotta-100 focus:border-terracotta-500 focus:outline-none rounded-xl text-xs transition"
+              />
+              <button
+                onClick={handleSave}
+                disabled={saving || !name.trim()}
+                className="shrink-0 h-9 px-3 bg-terracotta-500 hover:bg-terracotta-600 disabled:opacity-50 text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition"
+              >
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                Salvar
+              </button>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-center gap-1.5 text-[10px] text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
@@ -137,7 +141,9 @@ export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMold
             </div>
           ) : molds.length === 0 ? (
             <p className="text-[10px] text-clay-900/40 text-center py-3 font-sans">
-              Nenhum molde salvo ainda. Ajuste os parâmetros acima e salve o primeiro!
+              {isAdmin
+                ? 'Nenhum molde salvo ainda. Ajuste os parâmetros acima e salve o primeiro!'
+                : 'Nenhum molde salvo ainda.'}
             </p>
           ) : (
             <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
@@ -160,13 +166,15 @@ export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMold
                     >
                       <FolderOpen className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(mold.id)}
-                      className="p-1.5 rounded-lg bg-white hover:bg-red-50 border border-red-100/60 text-red-400 hover:text-red-600 transition"
-                      title="Excluir"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDelete(mold.id)}
+                        className="p-1.5 rounded-lg bg-white hover:bg-red-50 border border-red-100/60 text-red-400 hover:text-red-600 transition"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

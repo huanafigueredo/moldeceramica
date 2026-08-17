@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Sparkles, Compass, AlertTriangle, ArrowRight, RotateCw } from 'lucide-react';
 import { ShapeType } from '../types';
 import { getOfflineMoldSuggestions } from '../utils/moldLibrary';
+import { supabase } from '../lib/supabaseClient';
 
 interface AITemplateFinderProps {
   onSelectModel: (
@@ -50,14 +51,35 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResult[] | null>(null);
 
-  const handleSearch = (searchQuery: string) => {
+  const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
     setLoading(true);
     setError(null);
     setResults(null);
 
     try {
-      setResults(getOfflineMoldSuggestions(searchQuery));
+      // Admin-curated entries take priority; fall back to the built-in
+      // offline library when nothing in the database matches yet.
+      const { data, error: dbError } = await supabase
+        .from('mold_library')
+        .select('id, name, source, description, shape_type, dimensions')
+        .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+        .limit(5);
+
+      if (!dbError && data && data.length > 0) {
+        setResults(
+          data.map((row) => ({
+            id: row.id,
+            name: row.name,
+            source: row.source,
+            description: row.description,
+            shapeType: row.shape_type,
+            dimensions: row.dimensions,
+          }))
+        );
+      } else {
+        setResults(getOfflineMoldSuggestions(searchQuery));
+      }
     } catch (err: any) {
       console.error(err);
       setError("Não foi possível gerar sugestões para essa busca.");
@@ -275,7 +297,7 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
         <div className="space-y-4 max-w-3xl mx-auto">
           <div className="flex items-center justify-between px-2">
             <span className="text-xs font-bold text-clay-900/40 uppercase tracking-widest">
-              Encontramos 5 Modelos de Referência:
+              Encontramos {results.length} {results.length === 1 ? 'Modelo de Referência' : 'Modelos de Referência'}:
             </span>
           </div>
 
