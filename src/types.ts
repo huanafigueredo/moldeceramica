@@ -10,6 +10,7 @@ export interface CylinderParams {
   holeSpacing: number; // cm
   holeShape?: 'circle' | 'square' | 'flower' | 'star' | 'rectangle';
   edgeFinish?: 'straight' | 'scalloped' | 'wave';
+  wallThickness?: number; // clay wall thickness (cm), used for the liquid capacity estimate
 }
 
 export interface ConeParams {
@@ -18,6 +19,7 @@ export interface ConeParams {
   height: number; // desired vertical height (cm)
   shrinkage: number; // C%
   seamAllowance: number; // overlap (cm)
+  wallThickness?: number; // clay wall thickness (cm), used for the liquid capacity estimate
 }
 
 export interface TrayParams {

@@ -36,6 +36,7 @@ export default function Dashboard() {
     holeSpacing: 2.5,
     holeShape: 'circle',
     edgeFinish: 'straight',
+    wallThickness: 0.6,
   });
 
   const [coneParams, setConeParams] = useState<ConeParams>({
@@ -44,6 +45,7 @@ export default function Dashboard() {
     height: 16,
     shrinkage: 12.0,
     seamAllowance: 1.5,
+    wallThickness: 0.6,
   });
 
   const [trayParams, setTrayParams] = useState<TrayParams>({

@@ -1,8 +1,9 @@
 import React from 'react';
 import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams } from '../types';
-import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw } from 'lucide-react';
+import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet } from 'lucide-react';
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
+import { computeCylinderCapacity, computeConeCapacity, mlToOz } from '../utils/capacity';
 
 interface ParametricMoldsProps {
   shapeType: ShapeType;
@@ -593,6 +594,22 @@ export default function ParametricMolds({
                   onChange={(val) => handleUpdate('desiredDiameter', val)}
                 />
               </div>
+              <SliderInput
+                label="Espessura da Parede"
+                tip="Espessura da placa de argila; usada para estimar a capacidade interna"
+                value={(params as CylinderParams).wallThickness ?? 0.6}
+                min={0.3}
+                max={2.0}
+                step={0.1}
+                onChange={(val) => handleUpdate('wallThickness', val)}
+              />
+              <CapacityCard
+                {...computeCylinderCapacity(
+                  (params as CylinderParams).desiredDiameter,
+                  (params as CylinderParams).desiredHeight,
+                  (params as CylinderParams).wallThickness ?? 0.6
+                )}
+              />
             </div>
 
             {/* Details and Finish Section */}
@@ -721,6 +738,23 @@ export default function ParametricMolds({
                 max={45}
                 step={0.5}
                 onChange={(val) => handleUpdate('height', val)}
+              />
+              <SliderInput
+                label="Espessura da Parede"
+                tip="Espessura da placa de argila; usada para estimar a capacidade interna"
+                value={(params as ConeParams).wallThickness ?? 0.6}
+                min={0.3}
+                max={2.0}
+                step={0.1}
+                onChange={(val) => handleUpdate('wallThickness', val)}
+              />
+              <CapacityCard
+                {...computeConeCapacity(
+                  (params as ConeParams).topDiameter,
+                  (params as ConeParams).bottomDiameter,
+                  (params as ConeParams).height,
+                  (params as ConeParams).wallThickness ?? 0.6
+                )}
               />
             </div>
 
@@ -1201,6 +1235,29 @@ const SliderInput = ({
       <div className="flex justify-between text-[8px] text-clay-900/30 font-mono select-none">
         <span>{min} {unit}</span>
         <span>{max} {unit}</span>
+      </div>
+    </div>
+  );
+};
+
+// Estimated liquid capacity for hollow revolution pieces (mugs, cups, vases).
+const CapacityCard = ({ brimFullMl, practicalMl }: { brimFullMl: number; practicalMl: number }) => {
+  const practicalOz = mlToOz(practicalMl);
+  const brimOz = mlToOz(brimFullMl);
+
+  return (
+    <div className="bg-teal-600 rounded-2xl p-4 text-white shadow-sm flex items-center gap-3.5">
+      <div className="w-9 h-9 shrink-0 bg-white/15 rounded-xl flex items-center justify-center">
+        <Droplet className="w-4.5 h-4.5" />
+      </div>
+      <div className="flex-1">
+        <span className="text-[9px] font-bold uppercase tracking-[0.15em] opacity-80">Capacidade Estimada (uso prático)</span>
+        <div className="text-xl font-mono font-black leading-tight">
+          ≈ {practicalMl.toFixed(0)} mL <span className="opacity-70 text-sm font-bold">({practicalOz.toFixed(1)} oz)</span>
+        </div>
+        <span className="text-[9px] opacity-70 font-sans">
+          Cheio até ~1,25cm abaixo da borda • Até a borda: {brimFullMl.toFixed(0)} mL ({brimOz.toFixed(1)} oz)
+        </span>
       </div>
     </div>
   );
