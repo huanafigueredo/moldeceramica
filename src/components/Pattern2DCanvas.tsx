@@ -64,9 +64,10 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     // Padding around the pattern
     const padding = 50;
 
-    // Calculate bounding box and centering scale
-    const bboxW = data.bboxW; // in cm
-    const bboxH = data.bboxH; // in cm
+    // Calculate bounding box and centering scale — use the wider view bbox
+    // (body + handle strip) when present, so the whole pattern fits on screen
+    const bboxW = data.viewBboxW ?? data.bboxW; // in cm
+    const bboxH = data.viewBboxH ?? data.bboxH; // in cm
 
     // Scale calculations to fit pattern to container viewport
     const scaleX = (w - padding * 2) / bboxW;
@@ -374,6 +375,58 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.restore();
   };
 
+  // Shared handle-strip piece for Cylinder/Cone mugs: a flat strap template
+  // drawn below the main body pattern, plus (for the rectangular Cylinder
+  // pattern only) horizontal guides marking the two attach heights.
+  const drawHandleStrip = (ctx: CanvasRenderingContext2D, scale: number, d: any, bodyBboxH: number, showDimensions: boolean) => {
+    if (!d.hasHandle) return;
+    ctx.save();
+    const stripY = (bodyBboxH + d.handleGap) * scale;
+    const stripW = d.handleStripLength_mold * scale;
+    const stripH = d.handleWidth_mold * scale;
+
+    ctx.strokeStyle = '#2c4cdb';
+    ctx.lineWidth = 1.5;
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.roundRect(0, stripY, stripW, stripH, stripH / 2.2);
+    ctx.fill();
+    ctx.stroke();
+
+    if (showDimensions) {
+      ctx.fillStyle = '#374151';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`Alça (tira solta): ${d.handleStripLength_mold.toFixed(1)} x ${d.handleWidth_mold.toFixed(1)} cm`, 0, stripY + stripH + 14);
+    }
+    ctx.restore();
+  };
+
+  // Horizontal guides on the flat Cylinder pattern marking where the handle attaches
+  const drawHandleAttachGuides = (ctx: CanvasRenderingContext2D, scale: number, d: any, w_mold_px: number, h_mold_px: number) => {
+    if (!d.hasHandle) return;
+    const yTop = (d.h_mold - d.handleSpan_mold) / 2 * scale;
+    const yBottom = h_mold_px - (d.h_mold - d.handleSpan_mold) / 2 * scale;
+    ctx.save();
+    ctx.strokeStyle = '#c2410c';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 3]);
+    [yTop, yBottom].forEach((y) => {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w_mold_px, y);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#c2410c';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('Fixação da alça (topo)', 4, yTop - 3);
+    ctx.fillText('Fixação da alça (base)', 4, yBottom - 3);
+    ctx.restore();
+  };
+
   // 1. CYLINDER PATTERN DRAWING
   const drawCylinder = (
     ctx: CanvasRenderingContext2D,
@@ -493,6 +546,10 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         drawDimensionLine(ctx, 0, h_mold_px, w_active_px, h_mold_px, `Circunferência: ${data.circ_mold.toFixed(1)} cm`, 15);
       }
     }
+
+    drawHandleAttachGuides(ctx, scale, data, w_mold_px, h_mold_px);
+    drawHandleStrip(ctx, scale, data, data.h_mold, showDimensions);
+
     ctx.restore();
   };
 
@@ -521,6 +578,8 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         drawDimensionLine(ctx, 0, 0, d.bboxW * scale, 0, `Largura: ${d.bboxW.toFixed(1)} cm`, -15);
         drawDimensionLine(ctx, 0, 0, 0, d.bboxH * scale, `Altura: ${d.bboxH.toFixed(1)} cm`, -15, true);
       }
+      drawHandleAttachGuides(ctx, scale, d, d.bboxW * scale, d.h_mold * scale);
+      drawHandleStrip(ctx, scale, d, d.h_mold, showDimensions);
       return;
     }
 
@@ -680,6 +739,16 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       ctx.textAlign = 'center';
       ctx.fillText(`Ø Topo: ${d.dt_mold.toFixed(1)} cm | Ø Base: ${d.db_mold.toFixed(1)} cm`, apexX, d.bboxH * scale + 20);
       ctx.restore();
+    }
+
+    if (d.hasHandle) {
+      ctx.save();
+      ctx.fillStyle = '#374151';
+      ctx.font = 'italic 8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Meça a altura na peça montada para marcar os pontos de fixação da alça', (d.bboxW * scale) / 2, (d.bboxH * scale) + 34);
+      ctx.restore();
+      drawHandleStrip(ctx, scale, d, d.bboxH, showDimensions);
     }
 
     ctx.restore();

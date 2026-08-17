@@ -776,6 +776,63 @@ export default function ParametricMolds({
                 </div>
               )}
             </div>
+
+            {/* Handle Section — turns the cylinder into a mug/cup */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 bg-emerald-400 rounded-full" />
+                  <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Alça (Xícara)</h5>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer scale-90">
+                  <input
+                    type="checkbox"
+                    checked={(params as CylinderParams).hasHandle ?? false}
+                    onChange={(e) => handleUpdate('hasHandle', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-terracotta-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-terracotta-500"></div>
+                </label>
+              </div>
+
+              {(params as CylinderParams).hasHandle && (
+                <div className="space-y-4 p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100/50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <SliderInput
+                      label="Largura da Alça"
+                      tip="Espessura da tira de argila que forma a alça"
+                      value={(params as CylinderParams).handleWidth ?? 2.2}
+                      min={1}
+                      max={5}
+                      step={0.1}
+                      onChange={(val) => handleUpdate('handleWidth', val)}
+                    />
+                    <SliderInput
+                      label="Projeção da Alça"
+                      tip="Quanto a alça se afasta da parede da peça"
+                      value={(params as CylinderParams).handleProjection ?? 5}
+                      min={2}
+                      max={10}
+                      step={0.5}
+                      onChange={(val) => handleUpdate('handleProjection', val)}
+                    />
+                  </div>
+                  <SliderInput
+                    label="Vão de Fixação"
+                    tip="Distância vertical entre os dois pontos onde a alça encosta na peça, como % da altura"
+                    value={(params as CylinderParams).handleSpanPercent ?? 55}
+                    min={20}
+                    max={80}
+                    step={5}
+                    unit="%"
+                    onChange={(val) => handleUpdate('handleSpanPercent', val)}
+                  />
+                  <p className="text-[10px] text-clay-900/40 font-sans leading-relaxed">
+                    A alça sai como uma tira solta pra enrolar à mão — o molde do corpo mostra marcações de onde colar as duas pontas.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -848,6 +905,63 @@ export default function ParametricMolds({
                 step={0.1}
                 onChange={(val) => handleUpdate('seamAllowance', val)}
               />
+            </div>
+
+            {/* Handle Section — turns the cone into a mug/cup */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 bg-emerald-400 rounded-full" />
+                  <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Alça (Xícara)</h5>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer scale-90">
+                  <input
+                    type="checkbox"
+                    checked={(params as ConeParams).hasHandle ?? false}
+                    onChange={(e) => handleUpdate('hasHandle', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-terracotta-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-terracotta-500"></div>
+                </label>
+              </div>
+
+              {(params as ConeParams).hasHandle && (
+                <div className="space-y-4 p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100/50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <SliderInput
+                      label="Largura da Alça"
+                      tip="Espessura da tira de argila que forma a alça"
+                      value={(params as ConeParams).handleWidth ?? 2.2}
+                      min={1}
+                      max={5}
+                      step={0.1}
+                      onChange={(val) => handleUpdate('handleWidth', val)}
+                    />
+                    <SliderInput
+                      label="Projeção da Alça"
+                      tip="Quanto a alça se afasta da parede da peça"
+                      value={(params as ConeParams).handleProjection ?? 5}
+                      min={2}
+                      max={10}
+                      step={0.5}
+                      onChange={(val) => handleUpdate('handleProjection', val)}
+                    />
+                  </div>
+                  <SliderInput
+                    label="Vão de Fixação"
+                    tip="Distância vertical entre os dois pontos onde a alça encosta na peça, como % da altura"
+                    value={(params as ConeParams).handleSpanPercent ?? 55}
+                    min={20}
+                    max={80}
+                    step={5}
+                    unit="%"
+                    onChange={(val) => handleUpdate('handleSpanPercent', val)}
+                  />
+                  <p className="text-[10px] text-clay-900/40 font-sans leading-relaxed">
+                    A alça sai como uma tira solta pra enrolar à mão. Como o molde cônico é planificado em leque, meça a altura direto na peça montada pra marcar onde colar as pontas.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

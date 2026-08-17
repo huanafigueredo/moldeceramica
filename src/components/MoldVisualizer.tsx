@@ -7,6 +7,69 @@ import { computeOrganicOutline, pointsToPathD, scalePoints } from '../utils/orga
 import { computeBowlBands, BOWL_BAND_GAP } from '../utils/bowlShape';
 import { computeVaseBands, VASE_BAND_GAP } from '../utils/vaseShape';
 
+// Shared handle-strip sizing for Cylinder/Cone mugs: derives the flat strip
+// piece's dimensions and how much extra bbox space it needs below the main
+// pattern, so the same numbers stay consistent across the SVG/canvas/3D views.
+function getHandleData(
+  p: { hasHandle?: boolean; handleWidth?: number; handleProjection?: number; handleSpanPercent?: number },
+  h_mold: number,
+  shrinkFactor: number
+) {
+  if (!p.hasHandle) {
+    return { hasHandle: false, handleWidth_mold: 0, handleProjection_mold: 0, handleSpan_mold: 0, handleStripLength_mold: 0, handleGap: 0, extraH: 0 };
+  }
+  const handleWidth_mold = (p.handleWidth ?? 2.2) / shrinkFactor;
+  const handleProjection_mold = (p.handleProjection ?? 5) / shrinkFactor;
+  const handleSpan_mold = h_mold * ((p.handleSpanPercent ?? 55) / 100);
+  const handleStripLength_mold = handleSpan_mold + 2 * handleProjection_mold;
+  const handleGap = 1.5;
+  return {
+    hasHandle: true,
+    handleWidth_mold,
+    handleProjection_mold,
+    handleSpan_mold,
+    handleStripLength_mold,
+    handleGap,
+    extraH: handleWidth_mold + handleGap,
+  };
+}
+
+// Flat handle-strap template piece, drawn below the main Cylinder/Cone
+// pattern in the print SVG.
+function HandleStripSVG({ scale, data, bodyBboxH, showDimensions }: { scale: number; data: any; bodyBboxH: number; showDimensions: boolean }) {
+  if (!data.hasHandle) return null;
+  const stripY = (bodyBboxH + data.handleGap) * scale;
+  const stripW = data.handleStripLength_mold * scale;
+  const stripH = data.handleWidth_mold * scale;
+  return (
+    <g>
+      <rect x={0} y={stripY} width={stripW} height={stripH} rx={stripH / 2.2} className="stroke-[#2c4cdb] stroke-[1.5] fill-[#5a72e4]/[0.04]" />
+      {showDimensions && (
+        <text x={0} y={stripY + stripH + 14} className="fill-[#374151] font-sans text-[9px] font-bold" textAnchor="start">
+          Alça (tira solta): {data.handleStripLength_mold.toFixed(1)} x {data.handleWidth_mold.toFixed(1)} cm
+        </text>
+      )}
+    </g>
+  );
+}
+
+// Horizontal dashed guides on the flat, rectangular Cylinder pattern marking
+// the two heights where the handle should be attached.
+function HandleAttachGuidesSVG({ scale, data, wPx }: { scale: number; data: any; wPx: number }) {
+  if (!data.hasHandle) return null;
+  const marginY = ((data.h_mold - data.handleSpan_mold) / 2) * scale;
+  const yTop = marginY;
+  const yBottom = data.h_mold * scale - marginY;
+  return (
+    <g className="stroke-[#c2410c] stroke-[1] stroke-dasharray-[5,3]">
+      <line x1={0} y1={yTop} x2={wPx} y2={yTop} />
+      <line x1={0} y1={yBottom} x2={wPx} y2={yBottom} />
+      <text x={4} y={yTop - 3} className="fill-[#c2410c] font-mono text-[8px] font-bold" stroke="none">Fixação da alça (topo)</text>
+      <text x={4} y={yBottom - 3} className="fill-[#c2410c] font-mono text-[8px] font-bold" stroke="none">Fixação da alça (base)</text>
+    </g>
+  );
+}
+
 interface MoldVisualizerProps {
   shapeType: ShapeType;
   params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
@@ -45,6 +108,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
       const circ_mold = Math.PI * d_mold;
       const seam = showSeam ? p.seamAllowance : 0;
       const total_w = circ_mold + seam;
+      const handle = getHandleData(p, h_mold, shrinkFactor);
 
       return {
         type: 'cylinder',
@@ -53,9 +117,14 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
         circ_mold,
         seam,
         total_w,
-        // For drawing, bounding box in cm
+        ...handle,
+        // For drawing, bounding box in cm (body only — the handle strip
+        // extends the viewport via viewBboxW/H, but must not inflate the
+        // body outline itself, which is drawn directly from bboxW/bboxH)
         bboxW: total_w,
         bboxH: h_mold,
+        viewBboxW: Math.max(total_w, handle.handleStripLength_mold),
+        viewBboxH: h_mold + handle.extraH,
       };
     } else if (shapeType === 'cone') {
       const p = params as ConeParams;
@@ -71,6 +140,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
       if (Math.abs(rt - rb) < 0.001) {
         const circ = Math.PI * dt_mold;
         const total_w = circ + seam;
+        const handleCyl = getHandleData(p, h_mold, shrinkFactor);
         return {
           type: 'cone_cylindrical',
           h_mold,
@@ -78,8 +148,11 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
           circ,
           seam,
           total_w,
+          ...handleCyl,
           bboxW: total_w,
           bboxH: h_mold,
+          viewBboxW: Math.max(total_w, handleCyl.handleStripLength_mold),
+          viewBboxH: h_mold + handleCyl.extraH,
         };
       }
 
@@ -109,6 +182,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
 
       const bboxW = L_outer * 2 * Math.sin(total_theta / 2);
       const bboxH = L_outer - L_inner * Math.cos(total_theta / 2);
+      const handleCone = getHandleData(p, h_mold, shrinkFactor);
 
       return {
         type: 'cone',
@@ -123,8 +197,11 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
         total_theta,
         isTopLarger,
         seam,
+        ...handleCone,
         bboxW: Math.max(bboxW, 10),
         bboxH: Math.max(bboxH, 10),
+        viewBboxW: Math.max(bboxW, 10, handleCone.handleStripLength_mold),
+        viewBboxH: Math.max(bboxH, 10) + (handleCone.hasHandle ? handleCone.extraH + 2.5 : 0),
       };
     } else if (shapeType === 'tray') {
       const p = params as TrayParams;
@@ -278,8 +355,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
   // Dynamic scale & padding variables for drag coordinate calculation
   const scale = pxPerCm;
   const pad = 40;
-  const w_px = data.bboxW * scale;
-  const h_px = data.bboxH * scale;
+  const w_px = ((data as any).viewBboxW ?? data.bboxW) * scale;
+  const h_px = ((data as any).viewBboxH ?? data.bboxH) * scale;
   const vbW = w_px + pad * 2;
   const vbH = h_px + pad * 2;
 
@@ -427,9 +504,10 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
     const scale = pxPerCm; // 1cm = 37.795px
     const pad = 40; // px padding
 
-    // Sizing of actual viewport based on bounding box
-    const w_px = data.bboxW * scale;
-    const h_px = data.bboxH * scale;
+    // Sizing of actual viewport based on bounding box (widened to include
+    // the handle strip below the body, when present)
+    const w_px = ((data as any).viewBboxW ?? data.bboxW) * scale;
+    const h_px = ((data as any).viewBboxH ?? data.bboxH) * scale;
 
     // Center coordinates for rendering
     const centerX = w_px / 2 + pad;
@@ -777,6 +855,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                 </g>
               </g>
             )}
+
+            <HandleAttachGuidesSVG scale={scale} data={data} wPx={data.bboxW * scale} />
+            <HandleStripSVG scale={scale} data={data} bodyBboxH={data.bboxH} showDimensions={showDimensions} />
           </g>
         )}
 
@@ -991,6 +1072,17 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         })()}
                       </g>
                     )}
+
+                    {(data as any).hasHandle && (
+                      <g transform={`translate(${apexX - (data.bboxW * scale) / 2}, ${pad + d.bboxH * scale + 10})`}>
+                        {showDimensions && (
+                          <text x={(data.bboxW * scale) / 2} y={0} className={`${textStyle} text-[9px] italic`} textAnchor="middle">
+                            Meça a altura na peça montada para marcar os pontos de fixação da alça
+                          </text>
+                        )}
+                        <HandleStripSVG scale={scale} data={data} bodyBboxH={0} showDimensions={showDimensions} />
+                      </g>
+                    )}
                   </g>
                 );
               })()
@@ -1021,6 +1113,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                     </text>
                   </g>
                 )}
+                <HandleAttachGuidesSVG scale={scale} data={data} wPx={data.bboxW * scale} />
+                <HandleStripSVG scale={scale} data={data} bodyBboxH={data.bboxH} showDimensions={showDimensions} />
               </g>
             )}
           </g>

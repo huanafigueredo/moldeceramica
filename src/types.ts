@@ -11,6 +11,10 @@ export interface CylinderParams {
   holeShape?: 'circle' | 'square' | 'flower' | 'star' | 'rectangle';
   edgeFinish?: 'straight' | 'scalloped' | 'wave';
   wallThickness?: number; // clay wall thickness (cm), used for the liquid capacity estimate
+  hasHandle?: boolean; // adds a mug-style handle template + attachment guides
+  handleWidth?: number; // cm, width/thickness of the handle strap
+  handleProjection?: number; // cm, how far the handle sticks out from the wall
+  handleSpanPercent?: number; // 0-100, vertical attach span as % of body height, centered vertically
 }
 
 export interface ConeParams {
@@ -20,6 +24,10 @@ export interface ConeParams {
   shrinkage: number; // C%
   seamAllowance: number; // overlap (cm)
   wallThickness?: number; // clay wall thickness (cm), used for the liquid capacity estimate
+  hasHandle?: boolean; // adds a mug-style handle template + attachment guides
+  handleWidth?: number; // cm, width/thickness of the handle strap
+  handleProjection?: number; // cm, how far the handle sticks out from the wall
+  handleSpanPercent?: number; // 0-100, vertical attach span as % of body height, centered vertically
 }
 
 export interface TrayParams {

@@ -133,6 +133,43 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
     let faces: Face[] = [];
     let holePoints: Point3D[] = []; // for decorative cylinder holes representation
 
+    // Mug-style handle: a flat ribbon bent into a "D" arc, attached to the
+    // outside wall at rBody (front, x-axis), spanning handleSpanPercent of
+    // the body height, centered vertically.
+    const addHandle = (
+      rBody: number,
+      bodyHeight: number,
+      handleWidth: number,
+      handleProjection: number,
+      handleSpanPercent: number
+    ) => {
+      const steps = 14;
+      const span = bodyHeight * (Math.max(10, Math.min(90, handleSpanPercent)) / 100);
+      const yTop = span / 2;
+      const yBottom = -span / 2;
+      const startIdx = vertices.length;
+
+      for (let s = 0; s <= steps; s++) {
+        const t = s / steps;
+        const angle = t * Math.PI;
+        const outward = handleProjection * Math.sin(angle);
+        const xCenter = rBody + outward;
+        const yCenter = yBottom + (yTop - yBottom) * t;
+        vertices.push({ x: xCenter, y: yCenter, z: -handleWidth / 2 });
+        vertices.push({ x: xCenter, y: yCenter, z: handleWidth / 2 });
+      }
+
+      for (let s = 0; s < steps; s++) {
+        const a0 = startIdx + s * 2;
+        const a1 = a0 + 1;
+        const b0 = startIdx + (s + 1) * 2;
+        const b1 = b0 + 1;
+        // Front, back and outer-edge faces so the ribbon reads as solid from any angle
+        faces.push({ indices: [a0, b0, b1, a1], color: baseColor, outlineColor: edgeColor });
+        faces.push({ indices: [a1, b1, b0, a0], color: baseColor, outlineColor: edgeColor });
+      }
+    };
+
     if (shapeType === 'cylinder') {
       const p = params as CylinderParams;
       const r = (p.desiredDiameter / 2) * sizeMultiplier;
@@ -205,7 +242,11 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
           }
         }
       }
-    } 
+
+      if (p.hasHandle) {
+        addHandle(r, h, (p.handleWidth ?? 2.2) * sizeMultiplier, (p.handleProjection ?? 5) * sizeMultiplier, p.handleSpanPercent ?? 55);
+      }
+    }
     else if (shapeType === 'cone') {
       const p = params as ConeParams;
       const rt = (p.topDiameter / 2) * sizeMultiplier;
@@ -256,7 +297,12 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
           isBase: true,
         });
       }
-    } 
+
+      if (p.hasHandle) {
+        const rMid = (rt + rb) / 2;
+        addHandle(rMid, h, (p.handleWidth ?? 2.2) * sizeMultiplier, (p.handleProjection ?? 5) * sizeMultiplier, p.handleSpanPercent ?? 55);
+      }
+    }
     else if (shapeType === 'tray') {
       const p = params as TrayParams;
       const l_base = p.length * sizeMultiplier;
