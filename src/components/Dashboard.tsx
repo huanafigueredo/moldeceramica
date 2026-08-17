@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams } from '../types';
 import RetractionCalculator from './RetractionCalculator';
 import ParametricMolds from './ParametricMolds';
 import MoldVisualizer from './MoldVisualizer';
@@ -102,6 +102,16 @@ export default function Dashboard() {
     shrinkage: 12.0,
   });
 
+  const [bowlParams, setBowlParams] = useState<BowlParams>({
+    topDiameter: 18,
+    bottomDiameter: 8,
+    height: 9,
+    curvature: 60,
+    shrinkage: 12.0,
+    seamAllowance: 1.0,
+    wallThickness: 0.6,
+  });
+
   // Printing mosaic modal states
   const [printRequest, setPrintRequest] = useState<{
     svgString: string;
@@ -117,6 +127,7 @@ export default function Dashboard() {
     setNapkinHolderParams((p) => ({ ...p, shrinkage: newShrinkage }));
     setBoxParams((p) => ({ ...p, shrinkage: newShrinkage }));
     setOrganicPlateParams((p) => ({ ...p, shrinkage: newShrinkage }));
+    setBowlParams((p) => ({ ...p, shrinkage: newShrinkage }));
   };
 
   const getActiveParams = () => {
@@ -133,6 +144,8 @@ export default function Dashboard() {
         return boxParams;
       case 'organic_plate':
         return organicPlateParams;
+      case 'bowl':
+        return bowlParams;
     }
   };
 
@@ -161,6 +174,9 @@ export default function Dashboard() {
       case 'organic_plate':
         setOrganicPlateParams(newParams);
         break;
+      case 'bowl':
+        setBowlParams(newParams);
+        break;
     }
   };
 
@@ -179,6 +195,10 @@ export default function Dashboard() {
       setNapkinHolderParams(selectedParams);
     } else if (normalized === 'box') {
       setBoxParams(selectedParams);
+    } else if (normalized === 'organic_plate') {
+      setOrganicPlateParams(selectedParams);
+    } else if (normalized === 'bowl') {
+      setBowlParams(selectedParams);
     }
     // Switch to mold generator view and scroll smoothly to the workspace
     goToTab('generator');

@@ -1,16 +1,18 @@
 import React from 'react';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams } from '../types';
-import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams } from '../types';
+import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup } from 'lucide-react';
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
-import { computeCylinderCapacity, computeConeCapacity, mlToOz } from '../utils/capacity';
+import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, mlToOz } from '../utils/capacity';
 import SavedMoldsPanel from './SavedMoldsPanel';
+import { useAdminSession } from '../lib/adminAuth';
 
 interface ParametricMoldsProps {
   shapeType: ShapeType;
   setShapeType: (type: ShapeType) => void;
   globalShrinkage: number;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams;
   onChangeParams: (newParams: any) => void;
 }
 
@@ -22,6 +24,7 @@ export default function ParametricMolds({
   onChangeParams,
 }: ParametricMoldsProps) {
   const [showScale, setShowScale] = React.useState(false);
+  const { isAdmin } = useAdminSession();
 
   const handleUpdate = (key: string, value: any) => {
     onChangeParams({
@@ -50,6 +53,22 @@ export default function ParametricMolds({
       <div>
         <h4 className="text-xs font-bold text-clay-900/40 uppercase tracking-widest mb-3">Escolha o Molde Base</h4>
         <div className="grid grid-cols-2 gap-3">
+          {/* Add New Shape — admin only, shortcut into the library registration form */}
+          {isAdmin && (
+            <Link
+              to="/admin?tab=nova-referencia"
+              className="p-3.5 rounded-xl border border-dashed border-terracotta-300 text-left transition flex flex-col gap-1.5 bg-terracotta-50/40 hover:bg-terracotta-50 text-terracotta-700"
+            >
+              <PlusCircle className="w-5 h-5 text-terracotta-500" />
+              <div>
+                <div className="text-xs font-bold font-sans">Adicionar Novo</div>
+                <div className="text-[10px] text-terracotta-600/70">
+                  Cadastrar molde na biblioteca
+                </div>
+              </div>
+            </Link>
+          )}
+
           {/* Cylinder */}
           <button
             onClick={() => setShapeType('cylinder')}
@@ -157,6 +176,24 @@ export default function ParametricMolds({
               </div>
             </div>
           </button>
+
+          {/* Bowl */}
+          <button
+            onClick={() => setShapeType('bowl')}
+            className={`p-3.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+              shapeType === 'bowl'
+                ? 'bg-terracotta-500 text-white border-terracotta-600 shadow-md shadow-terracotta-500/10'
+                : 'bg-white/60 hover:bg-white border-terracotta-100 hover:border-terracotta-300 text-clay-900'
+            }`}
+          >
+            <Soup className={`w-5 h-5 ${shapeType === 'bowl' ? 'text-white' : 'text-terracotta-500'}`} />
+            <div>
+              <div className="text-xs font-bold font-sans">Tigela / Bowl</div>
+              <div className={`text-[10px] ${shapeType === 'bowl' ? 'text-terracotta-100' : 'text-clay-900/50'}`}>
+                Parede curva, montada em bandas
+              </div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -232,6 +269,11 @@ export default function ParametricMolds({
             h = Math.max(0.4, effLip * Math.sin(angleRad));
             w = outline.bboxW;
             label = `Prato Orgânico (${outline.bboxW.toFixed(1)} x ${outline.bboxH.toFixed(1)} cm)`;
+          } else if (shapeType === 'bowl') {
+            const p = params as BowlParams;
+            h = p.height || 9;
+            w = Math.max(p.topDiameter || 18, p.bottomDiameter || 8);
+            label = `Tigela/Bowl (${w.toFixed(1)} x ${h.toFixed(1)} cm)`;
           }
 
           return { h: Math.max(0.5, h), w: Math.max(0.5, w), label };
@@ -1130,6 +1172,93 @@ export default function ParametricMolds({
           </div>
         )}
 
+        {shapeType === 'bowl' && (
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1 h-4 bg-terracotta-400 rounded-full" />
+                <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Dimensões da Tigela</h5>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SliderInput
+                  label="Ø Borda"
+                  tip="Diâmetro da abertura da tigela"
+                  value={(params as BowlParams).topDiameter}
+                  min={6}
+                  max={40}
+                  step={0.5}
+                  onChange={(val) => handleUpdate('topDiameter', val)}
+                />
+                <SliderInput
+                  label="Ø Base"
+                  tip="Diâmetro do pé/base da tigela"
+                  value={(params as BowlParams).bottomDiameter}
+                  min={3}
+                  max={30}
+                  step={0.5}
+                  onChange={(val) => handleUpdate('bottomDiameter', val)}
+                />
+              </div>
+              <SliderInput
+                label="Altura"
+                tip="Altura final desejada"
+                value={(params as BowlParams).height}
+                min={4}
+                max={25}
+                step={0.5}
+                onChange={(val) => handleUpdate('height', val)}
+              />
+              <SliderInput
+                label="Curvatura da Parede"
+                tip="0 = parede reta (igual ao cone), 100 = perfil bem arredondado de tigela"
+                value={(params as BowlParams).curvature}
+                min={0}
+                max={100}
+                step={5}
+                unit="%"
+                onChange={(val) => handleUpdate('curvature', val)}
+              />
+              <SliderInput
+                label="Espessura da Parede"
+                tip="Espessura da placa de argila; usada para estimar a capacidade interna"
+                value={(params as BowlParams).wallThickness ?? 0.6}
+                min={0.3}
+                max={2.0}
+                step={0.1}
+                onChange={(val) => handleUpdate('wallThickness', val)}
+              />
+              <CapacityCard
+                {...computeBowlCapacity(
+                  (params as BowlParams).topDiameter,
+                  (params as BowlParams).bottomDiameter,
+                  (params as BowlParams).height,
+                  (params as BowlParams).curvature,
+                  (params as BowlParams).wallThickness ?? 0.6
+                )}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1 h-4 bg-amber-400 rounded-full" />
+                <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Montagem</h5>
+              </div>
+              <SliderInput
+                label="Margem de Costura"
+                tip="Largura extra para colagem entre as bandas empilhadas"
+                value={(params as BowlParams).seamAllowance}
+                min={0.2}
+                max={4.0}
+                step={0.1}
+                onChange={(val) => handleUpdate('seamAllowance', val)}
+              />
+              <p className="text-[10px] text-clay-900/40 font-sans leading-relaxed">
+                O molde é impresso em 6 bandas empilhadas que se aproximam da curva da tigela — corte e cole cada banda em sequência, da base até a borda.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* CLAY shrinkage linkage indicator */}
         <div className="mt-5 pt-4 border-t border-dashed border-terracotta-100/60 flex items-center justify-between text-xs font-sans">
           <div className="flex items-center gap-2 text-clay-900/60">
@@ -1174,6 +1303,11 @@ export default function ParametricMolds({
         {shapeType === 'organic_plate' && (
           <p className="text-clay-900/70 leading-relaxed">
             Como o contorno é livre, corte a base primeiro e depois erga a aba aos poucos com os dedos molhados, acompanhando a curva natural do recorte — não force igual em todos os pontos, o charme do prato orgânico é a variação sutil de altura ao redor da borda!
+          </p>
+        )}
+        {shapeType === 'bowl' && (
+          <p className="text-clay-900/70 leading-relaxed">
+            O molde da tigela sai em bandas empilhadas — junte-as em sequência, da base até a borda, alisando cada emenda por dentro e por fora com os dedos molhados antes de seguir para a próxima banda, assim a curva fica contínua e sem degraus visíveis.
           </p>
         )}
       </div>

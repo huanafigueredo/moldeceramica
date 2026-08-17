@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useSearchParams } from 'react-router-dom';
 import {
   Lock, LogOut, Trash2, Loader2, BookMarked, Lightbulb, PlusCircle,
   CheckCircle2, Circle, AlertTriangle, Flame,
@@ -59,6 +59,12 @@ const DIMENSION_FIELDS: Record<ShapeType, { key: string; label: string }[]> = {
   organic_plate: [
     { key: 'baseRadius', label: 'Raio Base (cm)' },
   ],
+  bowl: [
+    { key: 'topDiameter', label: 'Ø Borda (cm)' },
+    { key: 'bottomDiameter', label: 'Ø Base (cm)' },
+    { key: 'height', label: 'Altura (cm)' },
+    { key: 'curvature', label: 'Curvatura (0-100)' },
+  ],
 };
 
 const SHAPE_LABELS: Record<ShapeType, string> = {
@@ -68,11 +74,18 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
   napkin_holder: 'Porta-Guardanapo',
   box: 'Caixa',
   organic_plate: 'Prato Orgânico',
+  bowl: 'Tigela/Bowl',
 };
+
+const VALID_TABS: AdminTab[] = ['moldes', 'sugestoes', 'nova-referencia'];
 
 export default function AdminPage() {
   const { session, loading: sessionLoading } = useAdminSession();
-  const [tab, setTab] = useState<AdminTab>('moldes');
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab') as AdminTab | null;
+  const [tab, setTab] = useState<AdminTab>(
+    requestedTab && VALID_TABS.includes(requestedTab) ? requestedTab : 'moldes'
+  );
 
   if (sessionLoading) {
     return (

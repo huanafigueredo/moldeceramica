@@ -1,11 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams } from '../types';
 import { RotateCw, Sparkles, Package, Flame, Sliders, HelpCircle } from 'lucide-react';
 import { computeOrganicOutline, scalePoints } from '../utils/organicShape';
+import { bowlRadiusAt, BOWL_PREVIEW_RINGS } from '../utils/bowlShape';
+import { computeBowlCapacity } from '../utils/capacity';
 
 interface Interactive3DPreviewProps {
   shapeType: ShapeType;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams;
 }
 
 interface Point3D {
@@ -491,6 +493,54 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
         }
       }
     }
+    else if (shapeType === 'bowl') {
+      const p = params as BowlParams;
+      const rTop = (p.topDiameter / 2) * sizeMultiplier;
+      const rBottom = (p.bottomDiameter / 2) * sizeMultiplier;
+      const h = p.height * sizeMultiplier;
+      const segments = 24;
+      const rings = BOWL_PREVIEW_RINGS;
+
+      // One ring of vertices per height step, radius sampled from the curved profile
+      for (let ring = 0; ring <= rings; ring++) {
+        const t = ring / rings;
+        const r = bowlRadiusAt(t, rBottom, rTop, p.curvature);
+        const y = -h / 2 + t * h;
+        for (let i = 0; i < segments; i++) {
+          const theta = (i * 2 * Math.PI) / segments;
+          vertices.push({ x: r * Math.cos(theta), y, z: r * Math.sin(theta) });
+        }
+      }
+
+      // Center bottom vertex for the base disk
+      const centerBottomIdx = vertices.length;
+      vertices.push({ x: 0, y: -h / 2, z: 0 });
+
+      // Wall faces between consecutive rings
+      for (let ring = 0; ring < rings; ring++) {
+        const ringStart = ring * segments;
+        const nextRingStart = (ring + 1) * segments;
+        for (let i = 0; i < segments; i++) {
+          const next = (i + 1) % segments;
+          faces.push({
+            indices: [ringStart + i, ringStart + next, nextRingStart + next, nextRingStart + i],
+            color: baseColor,
+            outlineColor: edgeColor,
+          });
+        }
+      }
+
+      // Bottom base disk faces (fan from the first ring, which is the base)
+      for (let i = 0; i < segments; i++) {
+        const next = (i + 1) % segments;
+        faces.push({
+          indices: [i, next, centerBottomIdx],
+          color: stateMode === 'wet' ? '#bb8e7a' : '#b74c27',
+          outlineColor: edgeColor,
+          isBase: true,
+        });
+      }
+    }
 
     // 2. Rotate Points and Project to 2D
     const rotatedVertices: Point3D[] = [];
@@ -725,6 +775,10 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
       const verticalHeight = effLipHeight * Math.sin((p.lipAngle * Math.PI) / 180);
       const volumeCm3 = outline.baseArea * verticalHeight;
       return { volume: volumeCm3, label: 'Volume Útil Estimado (Prato Orgânico)' };
+    } else if (shapeType === 'bowl') {
+      const p = params as BowlParams;
+      const estimate = computeBowlCapacity(p.topDiameter, p.bottomDiameter, p.height, p.curvature, p.wallThickness ?? 0.6);
+      return { volume: estimate.brimFullMl, label: 'Capacidade Estimada (Tigela)' };
     } else {
       const p = params as NapkinHolderParams;
       // Volume inside the holder slot
@@ -896,6 +950,9 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
                   const effLip = hasLipDim ? p.lipHeight : 0;
                   const outline = computeOrganicOutline(p.baseRadius * s, p.irregularity, p.seed, effLip * s, p.lipAngle, 9, 8, p.customPoints ? scalePoints(p.customPoints, s) : undefined);
                   return `L ${outline.bboxW.toFixed(1)} x P ${outline.bboxH.toFixed(1)} x H ${(effLip * Math.sin((p.lipAngle * Math.PI) / 180) * s).toFixed(1)} cm`;
+                } else if (shapeType === 'bowl') {
+                  const p = params as BowlParams;
+                  return `Ø Borda ${(p.topDiameter * s).toFixed(1)} | Ø Base ${(p.bottomDiameter * s).toFixed(1)} x H ${(p.height * s).toFixed(1)} cm`;
                 } else {
                   const p = params as NapkinHolderParams;
                   return `W ${(p.width * s).toFixed(1)} x H ${(p.height * s).toFixed(1)} x D ${(p.depth * s).toFixed(1)} cm`;

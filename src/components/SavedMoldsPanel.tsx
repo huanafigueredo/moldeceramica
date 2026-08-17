@@ -25,6 +25,7 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
   napkin_holder: 'Porta-Guardanapo',
   box: 'Caixa',
   organic_plate: 'Prato Orgânico',
+  bowl: 'Tigela/Bowl',
 };
 
 export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMoldsPanelProps) {

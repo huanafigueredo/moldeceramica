@@ -1,13 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams } from '../types';
 import { Download, Printer, Layers, Sliders, Check, Settings, Scissors, Sparkles, HelpCircle } from 'lucide-react';
 import Interactive3DPreview from './Interactive3DPreview';
 import Pattern2DCanvas from './Pattern2DCanvas';
 import { computeOrganicOutline, pointsToPathD, scalePoints } from '../utils/organicShape';
+import { computeBowlBands, BOWL_BAND_GAP } from '../utils/bowlShape';
 
 interface MoldVisualizerProps {
   shapeType: ShapeType;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams;
   onPrintRequest: (svgString: string, boundingBox: { width: number; height: number }) => void;
   onChangeParams?: (newParams: any) => void;
 }
@@ -200,6 +201,29 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
         hasLid,
         bboxW: total_w,
         bboxH: total_h,
+      };
+    } else if (shapeType === 'bowl') {
+      const p = params as BowlParams;
+      const rt_mold = p.topDiameter / 2 / shrinkFactor;
+      const rb_mold = p.bottomDiameter / 2 / shrinkFactor;
+      const h_mold = p.height / shrinkFactor;
+      const seam = showSeam ? p.seamAllowance : 0;
+
+      const bands = computeBowlBands(rb_mold, rt_mold, h_mold, p.curvature, seam);
+      const bboxW = Math.max(...bands.map((b) => b.bboxW));
+      const bboxH = bands.reduce((sum, b) => sum + b.bboxH, 0) + BOWL_BAND_GAP * (bands.length - 1);
+
+      return {
+        type: 'bowl',
+        bands,
+        h_mold,
+        rt_mold,
+        rb_mold,
+        dt_mold: rt_mold * 2,
+        db_mold: rb_mold * 2,
+        seam,
+        bboxW,
+        bboxH,
       };
     } else {
       // organic_plate
@@ -970,6 +994,95 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                   </g>
                 )}
               </g>
+            )}
+          </g>
+        )}
+
+        {shapeType === 'bowl' && (
+          <g transform={`translate(${pad}, ${pad})`}>
+            {(() => {
+              const bowlData = data as any;
+              const bands = bowlData.bands as import('../utils/bowlShape').BandGeometry[];
+              let yCursor = 0;
+              return bands.map((band, i) => {
+                const bandOriginY = yCursor;
+                yCursor += (band.bboxH + 1.5) * scale; // BOWL_BAND_GAP in px
+
+                if (band.isCylindrical) {
+                  const bandW = band.bboxW * scale;
+                  const bandH = band.bboxH * scale;
+                  const x0 = (bowlData.bboxW * scale - bandW) / 2;
+                  return (
+                    <g key={i} transform={`translate(${x0}, ${bandOriginY})`}>
+                      <rect x="0" y="0" width={bandW} height={bandH} className={lineStyle} />
+                      {showSeam && band.rTop > 0 && data.seam > 0 && (
+                        <rect x={bandW - data.seam * scale} y="0" width={data.seam * scale} height={bandH} fill="#2c4cdb" fillOpacity="0.08" className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]" />
+                      )}
+                      {showDimensions && (
+                        <text x={bandW / 2} y={bandH / 2} className={textStyle} textAnchor="middle">
+                          Banda {i + 1}/{bands.length} — Ø {(band.rBottom * 2).toFixed(1)} cm
+                        </text>
+                      )}
+                    </g>
+                  );
+                }
+
+                const L_outer_px = band.L_outer * scale;
+                const L_inner_px = band.L_inner * scale;
+                const apexX = bowlData.bboxW * scale / 2;
+                const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+
+                const getArcPoint = (r: number, angleRad: number) => {
+                  const a = Math.PI / 2 + angleRad;
+                  return { x: apexX + r * Math.cos(a), y: apexY + r * Math.sin(a) };
+                };
+
+                const pt1_out = getArcPoint(L_outer_px, -band.total_theta / 2);
+                const pt2_out = getArcPoint(L_outer_px, band.total_theta / 2);
+                const pt3_in = getArcPoint(L_inner_px, band.total_theta / 2);
+                const pt4_in = getArcPoint(L_inner_px, -band.total_theta / 2);
+                const pt_circ_end = getArcPoint(L_outer_px, -band.total_theta / 2 + band.theta);
+                const pt_circ_end_in = getArcPoint(L_inner_px, -band.total_theta / 2 + band.theta);
+
+                const mainPath = `
+                  M ${pt1_out.x} ${pt1_out.y}
+                  A ${L_outer_px} ${L_outer_px} 0 ${band.total_theta > Math.PI ? 1 : 0} 1 ${pt2_out.x} ${pt2_out.y}
+                  L ${pt3_in.x} ${pt3_in.y}
+                  A ${L_inner_px} ${L_inner_px} 0 ${band.total_theta > Math.PI ? 1 : 0} 0 ${pt4_in.x} ${pt4_in.y}
+                  Z
+                `;
+
+                return (
+                  <g key={i}>
+                    <path d={mainPath} className={lineStyle} />
+
+                    {showSeam && bowlData.seam > 0 && (
+                      <path
+                        d={`M ${pt_circ_end.x} ${pt_circ_end.y} A ${L_outer_px} ${L_outer_px} 0 0 1 ${pt2_out.x} ${pt2_out.y} L ${pt3_in.x} ${pt3_in.y} A ${L_inner_px} ${L_inner_px} 0 0 0 ${pt_circ_end_in.x} ${pt_circ_end_in.y} Z`}
+                        fill="#2c4cdb"
+                        fillOpacity="0.08"
+                        className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]"
+                      />
+                    )}
+
+                    {showDimensions && (
+                      <text
+                        x={apexX}
+                        y={bandOriginY + band.bboxH * scale + 14}
+                        className={`${textStyle} text-[9px]`}
+                        textAnchor="middle"
+                      >
+                        Banda {i + 1}/{bands.length} • Ø {(band.rBottom * 2).toFixed(1)}→{(band.rTop * 2).toFixed(1)} cm • Geratriz {band.s.toFixed(1)} cm
+                      </text>
+                    )}
+                  </g>
+                );
+              });
+            })()}
+            {showDimensions && (
+              <text x={(data.bboxW * scale) / 2} y={data.bboxH * scale + 26} className={textStyle} textAnchor="middle">
+                Tigela: Ø Borda {(data as any).dt_mold.toFixed(1)} cm | Ø Base {(data as any).db_mold.toFixed(1)} cm | Altura {(data as any).h_mold.toFixed(1)} cm — corte e cole as {(data as any).bands.length} bandas em sequência
+              </text>
             )}
           </g>
         )}
