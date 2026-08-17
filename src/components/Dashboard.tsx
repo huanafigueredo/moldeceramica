@@ -408,7 +408,7 @@ export default function Dashboard() {
                 </button>
 
                 {/* CARD 5: ADVICE */}
-                <div className="lg:col-span-2 bg-[#fdfaf6] border border-stone-100 rounded-2xl p-6 shadow-sm flex items-start gap-4">
+                <div className="lg:col-span-2 bg-[#fafaf9] border border-stone-100 rounded-2xl p-6 shadow-sm flex items-start gap-4">
                   <div className="p-2 bg-stone-100 rounded-lg text-stone-500 shrink-0">
                     <Info className="w-4 h-4" />
                   </div>

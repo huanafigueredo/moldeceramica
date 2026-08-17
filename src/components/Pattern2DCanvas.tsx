@@ -143,7 +143,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     const startY = h - 30;
 
     ctx.save();
-    ctx.strokeStyle = '#3e3630';
+    ctx.strokeStyle = '#17171a';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(startX, startY);
@@ -154,7 +154,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.lineTo(startX + barPx, startY + 4);
     ctx.stroke();
 
-    ctx.fillStyle = '#3e3630';
+    ctx.fillStyle = '#17171a';
     ctx.font = '500 10px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText(`Escala Real: ${barCm} cm`, startX + barPx / 2, startY - 7);
@@ -173,11 +173,11 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.save();
     
     // Draw background
-    ctx.fillStyle = '#fdfaf6';
+    ctx.fillStyle = '#fafaf9';
     ctx.fillRect(0, 0, w, h);
 
     // Millimeter grid (0.1 cm)
-    ctx.strokeStyle = 'rgba(142, 74, 35, 0.03)';
+    ctx.strokeStyle = 'rgba(44, 76, 219, 0.03)';
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     
@@ -197,7 +197,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.stroke();
 
     // Centimeter grid (1.0 cm)
-    ctx.strokeStyle = 'rgba(142, 74, 35, 0.09)';
+    ctx.strokeStyle = 'rgba(44, 76, 219, 0.09)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     
@@ -311,7 +311,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     const yStart = (data.bboxH - (rows - 1) * p.holeSpacing) * scale / 2;
     const shape = p.holeShape || 'circle';
 
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 1;
     ctx.fillStyle = '#ffffff';
 
@@ -388,7 +388,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     // Draw main outline path
     ctx.save();
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 2;
     ctx.beginPath();
 
@@ -435,15 +435,15 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       ctx.closePath();
     }
     
-    ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
     ctx.fill();
     ctx.stroke();
 
     // Draw Seam Allowance overlay
     if (showSeam && p.seamAllowance > 0) {
       ctx.save();
-      ctx.fillStyle = 'rgba(142, 74, 35, 0.08)';
-      ctx.strokeStyle = '#8e4a23';
+      ctx.fillStyle = 'rgba(44, 76, 219, 0.08)';
+      ctx.strokeStyle = '#2c4cdb';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       
@@ -463,7 +463,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       ctx.stroke();
 
       // Label
-      ctx.fillStyle = '#8e4a23';
+      ctx.fillStyle = '#2c4cdb';
       ctx.font = 'italic 10px sans-serif';
       ctx.textAlign = 'center';
       ctx.save();
@@ -505,9 +505,9 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
   ) => {
     if (d.type !== 'cone') {
       // Cylindrical Fallback
-      ctx.strokeStyle = '#8e4a23';
+      ctx.strokeStyle = '#2c4cdb';
       ctx.lineWidth = 2;
-      ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+      ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
       ctx.beginPath();
       ctx.rect(0, 0, d.bboxW * scale, d.bboxH * scale);
       ctx.fill();
@@ -547,9 +547,9 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     const pt_circ_end_in = getPoint(L_inner_px, -total_theta / 2 + theta);
 
     // Draw main sector outline
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 2;
-    ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
     ctx.beginPath();
     
     ctx.moveTo(pt1_out.x, pt1_out.y);
@@ -592,8 +592,8 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     // Draw Seam allowance
     if (showSeam && d.seam > 0) {
       ctx.save();
-      ctx.fillStyle = 'rgba(142, 74, 35, 0.08)';
-      ctx.strokeStyle = '#8e4a23';
+      ctx.fillStyle = 'rgba(44, 76, 219, 0.08)';
+      ctx.strokeStyle = '#2c4cdb';
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
 
@@ -623,7 +623,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       // Label text
       const textX = (pt_circ_end.x + pt2_out.x) / 2;
       const textY = (pt_circ_end.y + pt2_out.y) / 2 - 10;
-      ctx.fillStyle = '#8e4a23';
+      ctx.fillStyle = '#2c4cdb';
       ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
       ctx.save();
@@ -696,9 +696,9 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     const r_ext = d.rim_ext * scale;
 
     // Drawing outer boundary path
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 2;
-    ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
     
     ctx.beginPath();
     ctx.moveTo(r_flat, 0);
@@ -715,7 +715,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     // Fold fold dashed lines (Base rectangle folds)
     ctx.save();
-    ctx.strokeStyle = '#e07a5f';
+    ctx.strokeStyle = '#5a72e4';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 4]);
     ctx.strokeRect(r_flat, r_flat, l_base, w_base);
@@ -733,7 +733,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.restore();
 
     // Draw central Face Label
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText(`BASE DE CORTE`, r_flat + l_base / 2, r_flat + w_base / 2 - 4);
@@ -798,12 +798,12 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         ctx.lineTo(w, plateH);
         ctx.closePath();
       }
-      ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+      ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
       ctx.fill();
       ctx.stroke();
     };
 
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 2;
 
     // 1. Draw Plate 1: Side Panel 1 (Top)
@@ -812,7 +812,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     
     // Draw 45 degree bevel score line at the bottom base connection
     ctx.save();
-    ctx.strokeStyle = '#e07a5f';
+    ctx.strokeStyle = '#5a72e4';
     ctx.lineWidth = 1.2;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
@@ -821,14 +821,14 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.stroke();
     ctx.restore();
 
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('PAREDE LATERAL 1', w / 2, h / 2 - 4);
     ctx.fillStyle = '#6b7280';
     ctx.font = '8.5px monospace';
     ctx.fillText(`${d.w_mold.toFixed(1)} x ${d.h_mold.toFixed(1)} cm`, w / 2, h / 2 + 8);
-    ctx.fillStyle = '#e07a5f';
+    ctx.fillStyle = '#5a72e4';
     ctx.fillText(`Corte Chanfrado 45° (${d.thick_mold.toFixed(2)}cm)`, w / 2, h - t - 5);
     ctx.restore();
 
@@ -838,13 +838,13 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.translate(0, h + sp);
     ctx.beginPath();
     ctx.rect(0, 0, w, db);
-    ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
     ctx.fill();
     ctx.stroke();
 
     // 45 degree bevel score lines on both sides of base joint
     ctx.save();
-    ctx.strokeStyle = '#e07a5f';
+    ctx.strokeStyle = '#5a72e4';
     ctx.lineWidth = 1.2;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
@@ -853,11 +853,11 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.stroke();
     ctx.restore();
 
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('PLACA DA BASE', w / 2, db / 2 + 3);
-    ctx.fillStyle = '#e07a5f';
+    ctx.fillStyle = '#5a72e4';
     ctx.font = '8px monospace';
     ctx.fillText('Chanfro 45°', w / 2, t - 2);
     ctx.fillText('Chanfro 45°', w / 2, db - t + 8);
@@ -870,7 +870,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     drawPlatePerimeter(h);
 
     ctx.save();
-    ctx.strokeStyle = '#e07a5f';
+    ctx.strokeStyle = '#5a72e4';
     ctx.lineWidth = 1.2;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
@@ -879,14 +879,14 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.stroke();
     ctx.restore();
 
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('PAREDE LATERAL 2', w / 2, h / 2 - 4);
     ctx.fillStyle = '#6b7280';
     ctx.font = '8.5px monospace';
     ctx.fillText(`${d.w_mold.toFixed(1)} x ${d.h_mold.toFixed(1)} cm`, w / 2, h / 2 + 8);
-    ctx.fillStyle = '#e07a5f';
+    ctx.fillStyle = '#5a72e4';
     ctx.fillText(`Corte Chanfrado 45° (${d.thick_mold.toFixed(2)}cm)`, w / 2, h - t - 5);
     ctx.restore();
 
@@ -921,9 +921,9 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     const bY = hM + (hasLid ? dM : 0);
 
     // Build box outer layout net path
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 2;
-    ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
     
     ctx.beginPath();
     if (hasLid) {
@@ -959,7 +959,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     // Draw fold lines inside
     ctx.save();
-    ctx.strokeStyle = '#e07a5f';
+    ctx.strokeStyle = '#5a72e4';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 4]);
 
@@ -980,7 +980,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     // Draw thickness guide lines for 45-degree chamfers
     if (thick > 0) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(224, 122, 95, 0.45)';
+      ctx.strokeStyle = 'rgba(90, 114, 228, 0.45)';
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 3]);
       ctx.strokeRect(bX + thick, bY + thick, wM - 2 * thick, dM - 2 * thick);
@@ -988,7 +988,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     }
 
     // Label each box panel
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.textAlign = 'center';
 
     // Base Panel
@@ -999,7 +999,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.fillText(`${d.w_mold.toFixed(1)}x${d.d_mold.toFixed(1)} cm`, bX + wM/2, bY + dM/2 + 7);
 
     // Front Panel
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 9.5px monospace';
     ctx.fillText('FRENTE', bX + wM/2, bY + dM + hM/2 - 3);
     ctx.font = '8px monospace';
@@ -1007,7 +1007,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.fillText(`${d.w_mold.toFixed(1)}x${d.h_mold.toFixed(1)} cm`, bX + wM/2, bY + dM + hM/2 + 7);
 
     // Back Panel
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 9.5px monospace';
     ctx.fillText('ATRÁS', bX + wM/2, bY - hM/2 - 3);
     ctx.font = '8px monospace';
@@ -1015,7 +1015,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.fillText(`${d.w_mold.toFixed(1)}x${d.h_mold.toFixed(1)} cm`, bX + wM/2, bY - hM/2 + 7);
 
     // Left Panel
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 9.5px monospace';
     ctx.fillText('ESQ', bX - hM/2, bY + dM/2 - 3);
     ctx.font = '8px monospace';
@@ -1023,7 +1023,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.fillText(`${d.h_mold.toFixed(1)}x${d.d_mold.toFixed(1)} cm`, bX - hM/2, bY + dM/2 + 7);
 
     // Right Panel
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 9.5px monospace';
     ctx.fillText('DIR', bX + wM + hM/2, bY + dM/2 - 3);
     ctx.font = '8px monospace';
@@ -1032,7 +1032,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     // Lid Panel
     if (hasLid) {
-      ctx.fillStyle = '#8e4a23';
+      ctx.fillStyle = '#2c4cdb';
       ctx.font = 'bold 9.5px monospace';
       ctx.fillText('TAMPA', bX + wM/2, bY - hM - dM/2 - 3);
       ctx.font = '8px monospace';
@@ -1069,9 +1069,9 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     const outerPx: { x: number; y: number }[] = d.outerPoints.map(toPx);
 
     // Outer cut line
-    ctx.strokeStyle = '#8e4a23';
+    ctx.strokeStyle = '#2c4cdb';
     ctx.lineWidth = 2;
-    ctx.fillStyle = 'rgba(224, 122, 95, 0.04)';
+    ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
     ctx.beginPath();
     outerPx.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
     ctx.closePath();
@@ -1081,7 +1081,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     // Inner fold guide (where the base ends and the rim rises) — only meaningful when there's a rim
     if (d.hasLip) {
       ctx.save();
-      ctx.strokeStyle = '#8e4a23';
+      ctx.strokeStyle = '#2c4cdb';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
@@ -1094,7 +1094,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     // Central label
     const cx = (d.bboxW * scale) / 2;
     const cy = (d.bboxH * scale) / 2;
-    ctx.fillStyle = '#8e4a23';
+    ctx.fillStyle = '#2c4cdb';
     ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     if (d.hasLip) {
@@ -1153,7 +1153,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       </div>
 
       {/* Floating Hint Text */}
-      <div className="absolute bottom-3 left-3 bg-[#fdfaf6]/95 border border-[#8e4a23]/10 px-2 py-1 rounded-md text-[9px] font-mono text-[#8e4a23]/60 shadow-sm pointer-events-none no-print">
+      <div className="absolute bottom-3 left-3 bg-[#fafaf9]/95 border border-[#2c4cdb]/10 px-2 py-1 rounded-md text-[9px] font-mono text-[#2c4cdb]/60 shadow-sm pointer-events-none no-print">
         🖱️ Arraste o canvas para mover o molde • 🔍 Zoom ativo: {(zoom * 100).toFixed(0)}%
       </div>
     </div>

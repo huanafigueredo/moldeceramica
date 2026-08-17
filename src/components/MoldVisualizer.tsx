@@ -387,9 +387,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
     const vbW = w_px + pad * 2;
     const vbH = h_px + pad * 2;
 
-    const lineStyle = "stroke-[#8e4a23] stroke-[1.5] fill-none";
-    const dashStyle = "stroke-[#8e4a23] stroke-[1] stroke-dasharray-[4,4] fill-none";
-    const textStyle = "fill-[#3e3630] font-sans text-xs select-none";
+    const lineStyle = "stroke-[#2c4cdb] stroke-[1.5] fill-none";
+    const dashStyle = "stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[4,4] fill-none";
+    const textStyle = "fill-[#17171a] font-sans text-xs select-none";
     const dimLineStyle = "stroke-gray-400 stroke-[1] marker-end-[url(#arrow)] marker-start-[url(#arrow)] fill-none";
     const dimTextStyle = "fill-gray-500 font-mono text-[10px] text-center";
 
@@ -399,7 +399,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
         viewBox={`0 0 ${vbW} ${vbH}`}
         width="100%"
         height="100%"
-        className="w-full h-full bg-[#fdfaf6]/50 rounded-xl border border-terracotta-100/50"
+        className="w-full h-full bg-[#fafaf9]/50 rounded-xl border border-terracotta-100/50"
       >
         <defs>
           {/* Arrow marker for dimension lines */}
@@ -416,9 +416,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
           </marker>
           {/* Subtle grid pattern */}
           <pattern id="grid" width={scale} height={scale} patternUnits="userSpaceOnUse">
-            <path d={`M ${scale} 0 L 0 0 0 ${scale}`} fill="none" stroke="#8e4a23" strokeWidth="0.5" strokeOpacity="0.08" />
+            <path d={`M ${scale} 0 L 0 0 0 ${scale}`} fill="none" stroke="#2c4cdb" strokeWidth="0.5" strokeOpacity="0.08" />
             {/* Subdivisions of 1mm */}
-            <path d={`M ${scale/2} 0 L ${scale/2} ${scale} M 0 ${scale/2} L ${scale} ${scale/2}`} fill="none" stroke="#8e4a23" strokeWidth="0.25" strokeOpacity="0.04" />
+            <path d={`M ${scale/2} 0 L ${scale/2} ${scale} M 0 ${scale/2} L ${scale} ${scale/2}`} fill="none" stroke="#2c4cdb" strokeWidth="0.25" strokeOpacity="0.04" />
           </pattern>
         </defs>
 
@@ -427,9 +427,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
 
         {/* Dynamic Scale Indicator (5cm bar) in corner */}
         <g transform={`translate(${pad}, ${vbH - pad + 15})`} className="no-print">
-          <line x1="0" y1="0" x2={5 * scale} y2="0" stroke="#3e3630" strokeWidth="2" />
-          <line x1="0" y1="-3" x2="0" y2="3" stroke="#3e3630" strokeWidth="2" />
-          <line x1={5 * scale} y1="-3" x2={5 * scale} y2="3" stroke="#3e3630" strokeWidth="2" />
+          <line x1="0" y1="0" x2={5 * scale} y2="0" stroke="#17171a" strokeWidth="2" />
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="#17171a" strokeWidth="2" />
+          <line x1={5 * scale} y1="-3" x2={5 * scale} y2="3" stroke="#17171a" strokeWidth="2" />
           <text x={2.5 * scale} y="-6" className={`${textStyle} text-[9px] font-mono`} textAnchor="middle">
             Escala Real: 5 cm
           </text>
@@ -516,9 +516,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                       y={seamYTop}
                       width={seam_px}
                       height={h_mold_px - seamYTop}
-                      fill="#8e4a23"
+                      fill="#2c4cdb"
                       fillOpacity="0.08"
-                      className="stroke-[#8e4a23] stroke-[1] stroke-dasharray-[2,2]"
+                      className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]"
                     />
                   );
                 })()}
@@ -563,7 +563,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                             cx={cx}
                             cy={cy}
                             r={holeRad}
-                            className="stroke-[#8e4a23] stroke-[1] fill-[#fdfaf6]"
+                            className="stroke-[#2c4cdb] stroke-[1] fill-[#fafaf9]"
                           />
                         );
                       } else if (shape === 'square') {
@@ -575,7 +575,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                             width={holeRad * 2}
                             height={holeRad * 2}
                             rx="1.5"
-                            className="stroke-[#8e4a23] stroke-[1] fill-[#fdfaf6]"
+                            className="stroke-[#2c4cdb] stroke-[1] fill-[#fafaf9]"
                           />
                         );
                       } else if (shape === 'rectangle') {
@@ -587,7 +587,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                             width={holeRad * 1.1}
                             height={holeRad * 2.8}
                             rx="1"
-                            className="stroke-[#8e4a23] stroke-[1] fill-[#fdfaf6]"
+                            className="stroke-[#2c4cdb] stroke-[1] fill-[#fafaf9]"
                           />
                         );
                       } else if (shape === 'star') {
@@ -604,7 +604,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           <path
                             key={key}
                             d={starD}
-                            className="stroke-[#8e4a23] stroke-[1] fill-[#fdfaf6]"
+                            className="stroke-[#2c4cdb] stroke-[1] fill-[#fafaf9]"
                           />
                         );
                       } else if (shape === 'flower') {
@@ -619,7 +619,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                             cx={cx}
                             cy={cy}
                             r={holeRad * 0.4}
-                            className="stroke-[#8e4a23] stroke-[0.8] fill-[#fdfaf6]"
+                            className="stroke-[#2c4cdb] stroke-[0.8] fill-[#fafaf9]"
                           />
                         );
                         
@@ -633,7 +633,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                               cx={px}
                               cy={py}
                               r={petalRad}
-                              className="stroke-[#8e4a23] stroke-[0.6] fill-[#fdfaf6]"
+                              className="stroke-[#2c4cdb] stroke-[0.6] fill-[#fafaf9]"
                             />
                           );
                         }
@@ -696,9 +696,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                   }}
                 >
                   <circle cx={data.bboxW * scale} cy={(data.bboxH * scale) / 2} r="18" fill="transparent" />
-                  <circle cx={data.bboxW * scale} cy={(data.bboxH * scale) / 2} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                  <circle cx={data.bboxW * scale} cy={(data.bboxH * scale) / 2} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                  <text x={data.bboxW * scale + 14} y={(data.bboxH * scale) / 2 + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                  <circle cx={data.bboxW * scale} cy={(data.bboxH * scale) / 2} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                  <circle cx={data.bboxW * scale} cy={(data.bboxH * scale) / 2} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                  <text x={data.bboxW * scale + 14} y={(data.bboxH * scale) / 2 + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                     ↔ Diâmetro
                   </text>
                 </g>
@@ -717,9 +717,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                   }}
                 >
                   <circle cx={(data.bboxW * scale) / 2} cy={data.bboxH * scale} r="18" fill="transparent" />
-                  <circle cx={(data.bboxW * scale) / 2} cy={data.bboxH * scale} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                  <circle cx={(data.bboxW * scale) / 2} cy={data.bboxH * scale} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                  <text x={(data.bboxW * scale) / 2} y={data.bboxH * scale + 18} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                  <circle cx={(data.bboxW * scale) / 2} cy={data.bboxH * scale} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                  <circle cx={(data.bboxW * scale) / 2} cy={data.bboxH * scale} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                  <text x={(data.bboxW * scale) / 2} y={data.bboxH * scale + 18} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                     ↕ Altura
                   </text>
                 </g>
@@ -800,9 +800,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           return (
                             <path
                               d={seamPath}
-                              fill="#8e4a23"
+                              fill="#2c4cdb"
                               fillOpacity="0.08"
-                              className="stroke-[#8e4a23] stroke-[1] stroke-dasharray-[2,2]"
+                              className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]"
                             />
                           );
                         })()}
@@ -884,9 +884,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           }}
                         >
                           <circle cx={pt2_out.x} cy={pt2_out.y} r="18" fill="transparent" />
-                          <circle cx={pt2_out.x} cy={pt2_out.y} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                          <circle cx={pt2_out.x} cy={pt2_out.y} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                          <text x={pt2_out.x + 12} y={pt2_out.y + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                          <circle cx={pt2_out.x} cy={pt2_out.y} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                          <circle cx={pt2_out.x} cy={pt2_out.y} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                          <text x={pt2_out.x + 12} y={pt2_out.y + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                             ↔ Ø Topo
                           </text>
                         </g>
@@ -905,9 +905,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           }}
                         >
                           <circle cx={pt3_in.x} cy={pt3_in.y} r="18" fill="transparent" />
-                          <circle cx={pt3_in.x} cy={pt3_in.y} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                          <circle cx={pt3_in.x} cy={pt3_in.y} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                          <text x={pt3_in.x + 12} y={pt3_in.y + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                          <circle cx={pt3_in.x} cy={pt3_in.y} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                          <circle cx={pt3_in.x} cy={pt3_in.y} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                          <text x={pt3_in.x + 12} y={pt3_in.y + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                             ↔ Ø Base
                           </text>
                         </g>
@@ -929,9 +929,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                               }}
                             >
                               <circle cx={pt_mid.x} cy={pt_mid.y} r="18" fill="transparent" />
-                              <circle cx={pt_mid.x} cy={pt_mid.y} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                              <circle cx={pt_mid.x} cy={pt_mid.y} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                              <text x={pt_mid.x} y={pt_mid.y + 18} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                              <circle cx={pt_mid.x} cy={pt_mid.y} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                              <circle cx={pt_mid.x} cy={pt_mid.y} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                              <text x={pt_mid.x} y={pt_mid.y + 18} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                                 ↕ Altura
                               </text>
                             </g>
@@ -952,9 +952,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                     y="0"
                     width={(data as any).seam * scale}
                     height={data.bboxH * scale}
-                    fill="#8e4a23"
+                    fill="#2c4cdb"
                     fillOpacity="0.08"
-                    className="stroke-[#8e4a23] stroke-[1] stroke-dasharray-[2,2]"
+                    className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]"
                   />
                 )}
                 {showDimensions && (
@@ -1072,9 +1072,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         }}
                       >
                         <circle cx={r_flat + l_base} cy={r_flat + w_base / 2} r="18" fill="transparent" />
-                        <circle cx={r_flat + l_base} cy={r_flat + w_base / 2} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                        <circle cx={r_flat + l_base} cy={r_flat + w_base / 2} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                        <text x={r_flat + l_base + 12} y={r_flat + w_base / 2 + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                        <circle cx={r_flat + l_base} cy={r_flat + w_base / 2} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                        <circle cx={r_flat + l_base} cy={r_flat + w_base / 2} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                        <text x={r_flat + l_base + 12} y={r_flat + w_base / 2 + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                           ↔ Comprimento
                         </text>
                       </g>
@@ -1093,9 +1093,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         }}
                       >
                         <circle cx={r_flat + l_base / 2} cy={r_flat + w_base} r="18" fill="transparent" />
-                        <circle cx={r_flat + l_base / 2} cy={r_flat + w_base} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                        <circle cx={r_flat + l_base / 2} cy={r_flat + w_base} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                        <text x={r_flat + l_base / 2} y={r_flat + w_base + 18} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                        <circle cx={r_flat + l_base / 2} cy={r_flat + w_base} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                        <circle cx={r_flat + l_base / 2} cy={r_flat + w_base} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                        <text x={r_flat + l_base / 2} y={r_flat + w_base + 18} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                           ↕ Largura
                         </text>
                       </g>
@@ -1114,9 +1114,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         }}
                       >
                         <circle cx={r_flat + l_base / 2} cy={0} r="18" fill="transparent" />
-                        <circle cx={r_flat + l_base / 2} cy={0} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                        <circle cx={r_flat + l_base / 2} cy={0} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                        <text x={r_flat + l_base / 2} y={-12} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                        <circle cx={r_flat + l_base / 2} cy={0} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                        <circle cx={r_flat + l_base / 2} cy={0} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                        <text x={r_flat + l_base / 2} y={-12} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                           ↕ Altura da Aba
                         </text>
                       </g>
@@ -1245,9 +1245,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         }}
                       >
                         <circle cx={w} cy={h / 2} r="18" fill="transparent" />
-                        <circle cx={w} cy={h / 2} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                        <circle cx={w} cy={h / 2} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                        <text x={w + 12} y={h / 2 + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                        <circle cx={w} cy={h / 2} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                        <circle cx={w} cy={h / 2} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                        <text x={w + 12} y={h / 2 + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                           ↔ Largura
                         </text>
                       </g>
@@ -1266,9 +1266,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         }}
                       >
                         <circle cx={w / 2} cy={0} r="18" fill="transparent" />
-                        <circle cx={w / 2} cy={0} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                        <circle cx={w / 2} cy={0} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                        <text x={w / 2} y={-12} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                        <circle cx={w / 2} cy={0} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                        <circle cx={w / 2} cy={0} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                        <text x={w / 2} y={-12} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                           ↕ Altura
                         </text>
                       </g>
@@ -1287,9 +1287,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                         }}
                       >
                         <circle cx={w / 2} cy={h + sp + db} r="18" fill="transparent" />
-                        <circle cx={w / 2} cy={h + sp + db} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                        <circle cx={w / 2} cy={h + sp + db} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                        <text x={w / 2} y={h + sp + db + 18} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                        <circle cx={w / 2} cy={h + sp + db} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                        <circle cx={w / 2} cy={h + sp + db} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                        <text x={w / 2} y={h + sp + db + 18} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                           ↕ Profundidade
                         </text>
                       </g>
@@ -1433,10 +1433,10 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                     {thick > 0 && (
                       <g className="opacity-40">
                         {/* 45 degree helpers */}
-                        <line x1={bX + thick} y1={bY + thick} x2={bX + thick} y2={bY + dM - thick} className={dashStyle} stroke="#e07a5f" />
-                        <line x1={bX + wM - thick} y1={bY + thick} x2={bX + wM - thick} y2={bY + dM - thick} className={dashStyle} stroke="#e07a5f" />
-                        <line x1={bX + thick} y1={bY + thick} x2={bX + wM - thick} y2={bY + thick} className={dashStyle} stroke="#e07a5f" />
-                        <line x1={bX + thick} y1={bY + dM - thick} x2={bX + wM - thick} y2={bY + dM - thick} className={dashStyle} stroke="#e07a5f" />
+                        <line x1={bX + thick} y1={bY + thick} x2={bX + thick} y2={bY + dM - thick} className={dashStyle} stroke="#5a72e4" />
+                        <line x1={bX + wM - thick} y1={bY + thick} x2={bX + wM - thick} y2={bY + dM - thick} className={dashStyle} stroke="#5a72e4" />
+                        <line x1={bX + thick} y1={bY + thick} x2={bX + wM - thick} y2={bY + thick} className={dashStyle} stroke="#5a72e4" />
+                        <line x1={bX + thick} y1={bY + dM - thick} x2={bX + wM - thick} y2={bY + dM - thick} className={dashStyle} stroke="#5a72e4" />
                       </g>
                     )}
 
@@ -1492,9 +1492,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           }}
                         >
                           <circle cx={bX + wM} cy={bY + dM + hM/2} r="18" fill="transparent" />
-                          <circle cx={bX + wM} cy={bY + dM + hM/2} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                          <circle cx={bX + wM} cy={bY + dM + hM/2} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                          <text x={bX + wM + 12} y={bY + dM + hM/2 + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                          <circle cx={bX + wM} cy={bY + dM + hM/2} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                          <circle cx={bX + wM} cy={bY + dM + hM/2} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                          <text x={bX + wM + 12} y={bY + dM + hM/2 + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                             ↔ Largura
                           </text>
                         </g>
@@ -1513,9 +1513,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           }}
                         >
                           <circle cx={bX + wM/2} cy={bY + dM + hM} r="18" fill="transparent" />
-                          <circle cx={bX + wM/2} cy={bY + dM + hM} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                          <circle cx={bX + wM/2} cy={bY + dM + hM} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                          <text x={bX + wM/2} y={bY + dM + hM + 18} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="middle">
+                          <circle cx={bX + wM/2} cy={bY + dM + hM} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                          <circle cx={bX + wM/2} cy={bY + dM + hM} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                          <text x={bX + wM/2} y={bY + dM + hM + 18} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="middle">
                             ↕ Altura
                           </text>
                         </g>
@@ -1534,9 +1534,9 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                           }}
                         >
                           <circle cx={bX + wM + hM} cy={bY + dM/2} r="18" fill="transparent" />
-                          <circle cx={bX + wM + hM} cy={bY + dM/2} r="10" fill="#8e4a23" fillOpacity="0.15" stroke="#8e4a23" strokeWidth="1" className="animate-pulse" />
-                          <circle cx={bX + wM + hM} cy={bY + dM/2} r="6" fill="#8e4a23" stroke="#ffffff" strokeWidth="2" />
-                          <text x={bX + wM + hM + 12} y={bY + dM/2 + 4} className="fill-[#8e4a23] font-sans font-bold text-[9px] select-none" textAnchor="start">
+                          <circle cx={bX + wM + hM} cy={bY + dM/2} r="10" fill="#2c4cdb" fillOpacity="0.15" stroke="#2c4cdb" strokeWidth="1" className="animate-pulse" />
+                          <circle cx={bX + wM + hM} cy={bY + dM/2} r="6" fill="#2c4cdb" stroke="#ffffff" strokeWidth="2" />
+                          <text x={bX + wM + hM + 12} y={bY + dM/2 + 4} className="fill-[#2c4cdb] font-sans font-bold text-[9px] select-none" textAnchor="start">
                             ↕ Profundidade
                           </text>
                         </g>
@@ -1567,7 +1567,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                   <path d={outerD} className={lineStyle} />
                   {/* Inner fold guide (where the base ends and the rim rises) — only meaningful when there's a rim */}
                   {d.hasLip && (
-                    <path d={innerD} className="stroke-[#8e4a23] stroke-[1] stroke-dasharray-[4,4] fill-none" />
+                    <path d={innerD} className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[4,4] fill-none" />
                   )}
 
                   <text x={(d.bboxW * scale) / 2} y={(d.bboxH * scale) / 2} className={`${textStyle} text-[10px] font-mono`} textAnchor="middle">

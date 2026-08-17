@@ -1,27 +1,35 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+/*
+ * "Estúdio Neutro" palette: a single cobalt accent over a cool-neutral base,
+ * replacing the old terracotta/clay (brown) scheme. Token names are kept as
+ * `terracotta-*`/`clay-*` on purpose — hundreds of className references
+ * across the app point at these names, and repainting them here (rather than
+ * renaming every call site) is the low-risk way to reskin the whole app from
+ * one place.
+ */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-serif: 'Space Grotesk', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  
-  --color-terracotta-50: #fdf5f2;
-  --color-terracotta-100: #fbebe5;
-  --color-terracotta-150: #f9e1d8;
-  --color-terracotta-200: #f6d8cb;
-  --color-terracotta-300: #e0a37e;
-  --color-terracotta-400: #c97a4a;
-  --color-terracotta-500: #8e4a23;
-  --color-terracotta-600: #7d3f1c;
-  --color-terracotta-700: #683216;
-  --color-clay-50: #fdfaf6;
-  --color-clay-100: #f5efe8;
-  --color-clay-200: #e8ded2;
-  --color-clay-500: #8c8177;
-  --color-clay-800: #4a423b;
-  --color-clay-900: #3e3630;
+
+  --color-terracotta-50: #eef1fd;
+  --color-terracotta-100: #e1e6fb;
+  --color-terracotta-150: #d3dbf9;
+  --color-terracotta-200: #c1ccf7;
+  --color-terracotta-300: #94a6f0;
+  --color-terracotta-400: #5a72e4;
+  --color-terracotta-500: #2c4cdb;
+  --color-terracotta-600: #2340c4;
+  --color-terracotta-700: #1b34a0;
+  --color-clay-50: #fafaf9;
+  --color-clay-100: #f1f1ef;
+  --color-clay-200: #e7e7e2;
+  --color-clay-500: #6b6b70;
+  --color-clay-800: #2e2e33;
+  --color-clay-900: #17171a;
 }
 
 @layer base {

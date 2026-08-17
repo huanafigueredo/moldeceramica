@@ -74,14 +74,14 @@ export default function OrganicPointEditor({ points, onChange }: OrganicPointEdi
         viewBox={`0 0 ${viewSize} ${viewSize}`}
         className="w-full aspect-square touch-none select-none rounded-lg"
       >
-        <rect width={viewSize} height={viewSize} fill="#fdfaf6" rx="12" />
+        <rect width={viewSize} height={viewSize} fill="#fafaf9" rx="12" />
 
         {/* Smooth outline preview, same math as the mold itself */}
-        <path d={pathD} fill="rgba(224, 122, 95, 0.10)" stroke="#8e4a23" strokeWidth="1.5" />
+        <path d={pathD} fill="rgba(90, 114, 228, 0.10)" stroke="#2c4cdb" strokeWidth="1.5" />
 
         {/* Center reference crosshair */}
-        <line x1={center - 5} y1={center} x2={center + 5} y2={center} stroke="#8e4a23" strokeWidth="0.75" opacity="0.35" />
-        <line x1={center} y1={center - 5} x2={center} y2={center + 5} stroke="#8e4a23" strokeWidth="0.75" opacity="0.35" />
+        <line x1={center - 5} y1={center} x2={center + 5} y2={center} stroke="#2c4cdb" strokeWidth="0.75" opacity="0.35" />
+        <line x1={center} y1={center - 5} x2={center} y2={center + 5} stroke="#2c4cdb" strokeWidth="0.75" opacity="0.35" />
 
         {/* Faint spoke guides showing each point's locked drag direction */}
         {points.map((_, i) => {
@@ -94,7 +94,7 @@ export default function OrganicPointEditor({ points, onChange }: OrganicPointEdi
               y1={center}
               x2={far.x}
               y2={far.y}
-              stroke="#8e4a23"
+              stroke="#2c4cdb"
               strokeWidth="0.5"
               opacity="0.08"
             />
@@ -112,7 +112,7 @@ export default function OrganicPointEditor({ points, onChange }: OrganicPointEdi
               y1={a.y}
               x2={b.x}
               y2={b.y}
-              stroke="#c9a08a"
+              stroke="#94a6f0"
               strokeWidth="1"
               strokeDasharray="2,3"
               opacity="0.6"
@@ -131,7 +131,7 @@ export default function OrganicPointEditor({ points, onChange }: OrganicPointEdi
                 cx={s.x}
                 cy={s.y}
                 r={isActive ? 9 : 7}
-                fill={isActive ? '#7d3f1c' : '#8e4a23'}
+                fill={isActive ? '#2340c4' : '#2c4cdb'}
                 stroke="#ffffff"
                 strokeWidth="2"
                 className="cursor-grab active:cursor-grabbing"

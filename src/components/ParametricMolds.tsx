@@ -284,10 +284,10 @@ export default function ParametricMolds({
                 {/* Grid Background */}
                 <g opacity="0.05">
                   {Array.from({ length: 12 }).map((_, i) => (
-                    <line key={`grid-h-${i}`} x1="0" y1={i * 10} x2="320" y2={i * 10} stroke="#3e3630" strokeWidth="0.5" />
+                    <line key={`grid-h-${i}`} x1="0" y1={i * 10} x2="320" y2={i * 10} stroke="#17171a" strokeWidth="0.5" />
                   ))}
                   {Array.from({ length: 32 }).map((_, i) => (
-                    <line key={`grid-v-${i}`} x1={i * 10} y1="0" x2={i * 10} y2="120" stroke="#3e3630" strokeWidth="0.5" />
+                    <line key={`grid-v-${i}`} x1={i * 10} y1="0" x2={i * 10} y2="120" stroke="#17171a" strokeWidth="0.5" />
                   ))}
                 </g>
 
@@ -317,7 +317,7 @@ export default function ParametricMolds({
                   <text
                     x="55"
                     y={cy + r * 0.45}
-                    fill="#8e4a23"
+                    fill="#2c4cdb"
                     fontSize={r * 0.32}
                     fontWeight="extrabold"
                     textAnchor="middle"

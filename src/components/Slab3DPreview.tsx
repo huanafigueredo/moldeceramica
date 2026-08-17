@@ -287,7 +287,7 @@ export function Slab3DCanvas({
           />
         </Center>
 
-        <gridHelper args={[60, 60, '#8e4a23', '#ece1da']} position={[0, -0.01, 0]} />
+        <gridHelper args={[60, 60, '#2c4cdb', '#e7e7e2']} position={[0, -0.01, 0]} />
         <axesHelper args={[5]} />
 
         <OrbitControls
@@ -435,7 +435,7 @@ export default function Slab3DPreview(props: Slab3DPreviewProps) {
       </div>
 
       {/* R3F 3D Canvas Box Container */}
-      <div className="relative flex-1 min-h-[280px] md:min-h-[340px] w-full rounded-xl bg-gradient-to-b from-[#fefdfb] to-[#fdfaf6] border border-terracotta-100/40 shadow-inner overflow-hidden">
+      <div className="relative flex-1 min-h-[280px] md:min-h-[340px] w-full rounded-xl bg-gradient-to-b from-[#fdfdfc] to-[#fafaf9] border border-terracotta-100/40 shadow-inner overflow-hidden">
         <Canvas shadows camera={{ position: [0, 15, 20], fov: 45 }}>
           {/* Lighting */}
           <ambientLight intensity={0.5} />
@@ -459,7 +459,7 @@ export default function Slab3DPreview(props: Slab3DPreviewProps) {
           </Center>
 
           {/* Workspace cutting/rolling table grid */}
-          <gridHelper args={[60, 60, '#8e4a23', '#ece1da']} position={[0, -0.01, 0]} />
+          <gridHelper args={[60, 60, '#2c4cdb', '#e7e7e2']} position={[0, -0.01, 0]} />
           <axesHelper args={[5]} />
 
           {/* Interactive controls */}
@@ -525,7 +525,7 @@ export default function Slab3DPreview(props: Slab3DPreviewProps) {
       </div>
 
       {/* Sliders and Properties Panel */}
-      <div className="mt-4 bg-[#fdfaf6]/70 border border-terracotta-100/30 rounded-xl p-3.5 space-y-3.5">
+      <div className="mt-4 bg-[#fafaf9]/70 border border-terracotta-100/30 rounded-xl p-3.5 space-y-3.5">
         
         {/* Thickness Slider Control */}
         <div className="space-y-1.5">

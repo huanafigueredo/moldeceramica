@@ -780,7 +780,7 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
       {/* 3D Canvas Box Container */}
       <div
         ref={containerRef}
-        className="relative flex-1 min-h-[280px] md:min-h-[340px] w-full rounded-xl bg-gradient-to-b from-[#fefdfb] to-[#fdfaf6] border border-terracotta-100/40 shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
+        className="relative flex-1 min-h-[280px] md:min-h-[340px] w-full rounded-xl bg-gradient-to-b from-[#fdfdfc] to-[#fafaf9] border border-terracotta-100/40 shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
       >
         <canvas
           ref={canvasRef}
@@ -836,7 +836,7 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
       </div>
 
       {/* 3D Physical Properties Panel */}
-      <div className="mt-4 bg-[#fdfaf6]/70 border border-terracotta-100/30 rounded-xl p-3.5 space-y-2.5">
+      <div className="mt-4 bg-[#fafaf9]/70 border border-terracotta-100/30 rounded-xl p-3.5 space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Package className="w-4 h-4 text-terracotta-500" />

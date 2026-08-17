@@ -132,8 +132,8 @@ export default function PatternVisualPreview({
     const center_x = vbW / 2;
     const center_y = vbH / 2;
 
-    const wetColor = '#8e4a23'; // Terracotta core
-    const firedColor = '#cf7c53'; // Fired warm clay
+    const wetColor = '#2c4cdb'; // Accent, solid — wet/mold size
+    const firedColor = '#94a6f0'; // Accent, light tint — fired/finished size
     const naiveColor = '#9ca3af'; // Gray naive
 
     const lineStyle = `stroke-[1.5] fill-none`;
@@ -153,7 +153,7 @@ export default function PatternVisualPreview({
             r={r}
             stroke={stroke}
             strokeWidth="1.2"
-            fill={isDash ? "none" : "#fdfaf6"}
+            fill={isDash ? "none" : "#fafaf9"}
             className={cls}
           />
         );
@@ -167,7 +167,7 @@ export default function PatternVisualPreview({
             rx="1.5"
             stroke={stroke}
             strokeWidth="1.2"
-            fill={isDash ? "none" : "#fdfaf6"}
+            fill={isDash ? "none" : "#fafaf9"}
             className={cls}
           />
         );
@@ -183,7 +183,7 @@ export default function PatternVisualPreview({
             points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
             stroke={stroke}
             strokeWidth="1.2"
-            fill={isDash ? "none" : "#fdfaf6"}
+            fill={isDash ? "none" : "#fafaf9"}
             className={cls}
           />
         );
@@ -201,7 +201,7 @@ export default function PatternVisualPreview({
             r={r * 0.35}
             stroke={stroke}
             strokeWidth="0.8"
-            fill={isDash ? "none" : "#fdfaf6"}
+            fill={isDash ? "none" : "#fafaf9"}
           />
         );
         
@@ -217,7 +217,7 @@ export default function PatternVisualPreview({
               r={petalRad}
               stroke={stroke}
               strokeWidth="0.6"
-              fill={isDash ? "none" : "#fdfaf6"}
+              fill={isDash ? "none" : "#fafaf9"}
             />
           );
         }
@@ -343,13 +343,13 @@ export default function PatternVisualPreview({
         viewBox={`0 0 ${vbW} ${vbH}`}
         width="100%"
         height="100%"
-        className="w-full h-full bg-[#fdfaf6]/50 rounded-xl transition-all"
+        className="w-full h-full bg-[#fafaf9]/50 rounded-xl transition-all"
       >
         <defs>
           {/* Grid pattern */}
           <pattern id="previewGrid" width={scale} height={scale} patternUnits="userSpaceOnUse">
-            <path d={`M ${scale} 0 L 0 0 0 ${scale}`} fill="none" stroke="#8e4a23" strokeWidth="0.5" strokeOpacity="0.08" />
-            <path d={`M ${scale/2} 0 L ${scale/2} ${scale} M 0 ${scale/2} L ${scale} ${scale/2}`} fill="none" stroke="#8e4a23" strokeWidth="0.25" strokeOpacity="0.03" />
+            <path d={`M ${scale} 0 L 0 0 0 ${scale}`} fill="none" stroke="#2c4cdb" strokeWidth="0.5" strokeOpacity="0.08" />
+            <path d={`M ${scale/2} 0 L ${scale/2} ${scale} M 0 ${scale/2} L ${scale} ${scale/2}`} fill="none" stroke="#2c4cdb" strokeWidth="0.25" strokeOpacity="0.03" />
           </pattern>
         </defs>
 
@@ -357,10 +357,10 @@ export default function PatternVisualPreview({
 
         {/* Real scale helper: 5 cm line */}
         <g transform={`translate(${pad}, ${vbH - 25})`} className="no-print">
-          <line x1="0" y1="0" x2={5 * scale} y2="0" stroke="#3e3630" strokeWidth="2" />
-          <line x1="0" y1="-3" x2="0" y2="3" stroke="#3e3630" strokeWidth="2" />
-          <line x1={5 * scale} y1="-3" x2={5 * scale} y2="3" stroke="#3e3630" strokeWidth="2" />
-          <text x={2.5 * scale} y="-6" className="fill-[#3e3630] font-sans text-[9px] font-mono select-none" textAnchor="middle">
+          <line x1="0" y1="0" x2={5 * scale} y2="0" stroke="#17171a" strokeWidth="2" />
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="#17171a" strokeWidth="2" />
+          <line x1={5 * scale} y1="-3" x2={5 * scale} y2="3" stroke="#17171a" strokeWidth="2" />
+          <text x={2.5 * scale} y="-6" className="fill-[#17171a] font-sans text-[9px] font-mono select-none" textAnchor="middle">
             Escala Real: 5 cm
           </text>
         </g>
@@ -407,7 +407,7 @@ export default function PatternVisualPreview({
 
             {/* Dimension Lines */}
             <g transform={`translate(${center_x}, ${center_y - (wetSize / 2) * scale - 10})`}>
-              <text y="-4" className="fill-[#8e4a23] font-mono text-[9px] font-bold" textAnchor="middle">
+              <text y="-4" className="fill-[#2c4cdb] font-mono text-[9px] font-bold" textAnchor="middle">
                 Molde Úmido: Ø {wetSize.toFixed(2)} cm
               </text>
             </g>
@@ -461,7 +461,7 @@ export default function PatternVisualPreview({
 
             {/* Dimension Labels */}
             <g transform={`translate(${center_x}, ${center_y - (wetSize / 2) * scale - 10})`}>
-              <text y="-4" className="fill-[#8e4a23] font-mono text-[9px] font-bold" textAnchor="middle">
+              <text y="-4" className="fill-[#2c4cdb] font-mono text-[9px] font-bold" textAnchor="middle">
                 Lado do Molde Úmido: {wetSize.toFixed(2)} cm
               </text>
             </g>
@@ -492,16 +492,16 @@ export default function PatternVisualPreview({
                   height={bbox.h * scale}
                   rx={activeCornerRadius * scale}
                   ry={activeCornerRadius * scale}
-                  fill="#8e4a23"
+                  fill="#2c4cdb"
                   fillOpacity="0.07"
-                  stroke="#8e4a23"
+                  stroke="#2c4cdb"
                   strokeWidth="0.8"
                   strokeDasharray="2,2"
                 />
                 <text
                   x={(bbox.w - seamAllowance / 2) * scale}
                   y={(bbox.h / 2) * scale}
-                  className="fill-[#8e4a23]/60 font-mono text-[8px] font-semibold select-none"
+                  className="fill-[#2c4cdb]/60 font-mono text-[8px] font-semibold select-none"
                   textAnchor="middle"
                   writingMode="vertical-rl"
                 >
@@ -542,13 +542,13 @@ export default function PatternVisualPreview({
             {holeElements}
 
             {/* Text details */}
-            <text x={4} y={12} className="fill-[#8e4a23] font-mono text-[9px] font-bold">
+            <text x={4} y={12} className="fill-[#2c4cdb] font-mono text-[9px] font-bold">
               Largura Total: {bbox.w.toFixed(2)} cm
             </text>
-            <text x={4} y={24} className="fill-[#8e4a23]/70 font-mono text-[8px]">
+            <text x={4} y={24} className="fill-[#2c4cdb]/70 font-mono text-[8px]">
               Circunferência Úmida: {(Math.PI * wetSize).toFixed(2)} cm
             </text>
-            <text x={4} y={bbox.h * scale - 6} className="fill-[#8e4a23] font-mono text-[9px] font-bold">
+            <text x={4} y={bbox.h * scale - 6} className="fill-[#2c4cdb] font-mono text-[9px] font-bold">
               Altura Úmida: {bbox.h.toFixed(2)} cm
             </text>
           </g>
@@ -647,7 +647,7 @@ export default function PatternVisualPreview({
           {/* Left Column: Live SVG/3D Render Frame & extra controls */}
           <div className="xl:col-span-6 flex flex-col justify-between space-y-4">
             {viewMode === '2d' ? (
-              <div className="relative aspect-square w-full max-w-[320px] mx-auto bg-[#fdfaf6] border border-terracotta-100/60 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner group">
+              <div className="relative aspect-square w-full max-w-[320px] mx-auto bg-[#fafaf9] border border-terracotta-100/60 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner group">
                 {renderSVGElements()}
 
                 {/* Interactive Toggle options in floating panel */}
@@ -664,7 +664,7 @@ export default function PatternVisualPreview({
                 </div>
               </div>
             ) : (
-              <div className="relative aspect-square w-full max-w-[320px] mx-auto bg-gradient-to-b from-[#fefdfb] to-[#fdfaf6] border border-terracotta-100/60 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center">
+              <div className="relative aspect-square w-full max-w-[320px] mx-auto bg-gradient-to-b from-[#fdfdfc] to-[#fafaf9] border border-terracotta-100/60 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center">
                 <Slab3DCanvas
                   shape={shape}
                   wetSize={wetSize}
@@ -683,7 +683,7 @@ export default function PatternVisualPreview({
 
             {/* 3D Exclusive Controls: Thickness and State (Wet/Fired) */}
             {viewMode === '3d' && (
-              <div className="p-3 bg-[#fdfaf6] border border-terracotta-100/40 rounded-xl space-y-3 shadow-sm">
+              <div className="p-3 bg-[#fafaf9] border border-terracotta-100/40 rounded-xl space-y-3 shadow-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-bold text-clay-900/80 font-sans flex items-center gap-1">
                     <Sliders className="w-3.5 h-3.5 text-terracotta-500" />
@@ -759,7 +759,7 @@ export default function PatternVisualPreview({
 
             {/* Corner Radius Input */}
             {shape !== 'circle' ? (
-              <div className="p-3 bg-[#fdfaf6] border border-terracotta-100/30 rounded-xl space-y-2">
+              <div className="p-3 bg-[#fafaf9] border border-terracotta-100/30 rounded-xl space-y-2">
                 <div className="flex justify-between items-center text-xs font-semibold text-clay-900">
                   <span className="flex items-center gap-1">
                     Arredondamento dos Cantos (Corner Radius)
@@ -886,7 +886,7 @@ export default function PatternVisualPreview({
               </div>
 
               {/* Quadratic shrinkage insight card */}
-              <div className="p-2.5 bg-[#fdfaf6] border border-terracotta-100/40 rounded-lg text-[9.5px] text-stone-600 leading-relaxed flex gap-1.5 items-start">
+              <div className="p-2.5 bg-[#fafaf9] border border-terracotta-100/40 rounded-lg text-[9.5px] text-stone-600 leading-relaxed flex gap-1.5 items-start">
                 <Info className="w-3.5 h-3.5 text-terracotta-500 flex-shrink-0 mt-0.5" />
                 <p>
                   A contração volumétrica é maior que a linear. Encolher <strong>{shrinkageRate.toFixed(1)}%</strong> linearmente reduz <strong>{areaReduction.toFixed(1)}%</strong> da superfície da placa de argila!
@@ -904,7 +904,7 @@ export default function PatternVisualPreview({
                   {showFiredOutline ? <Eye className="w-3.5 h-3.5 text-terracotta-500" /> : <EyeOff className="w-3.5 h-3.5" />}
                   <span>Contração Esperada (Peça Queimada)</span>
                 </button>
-                <div className="w-6 h-0.5 border-t-2 border-dashed border-[#cf7c53]" />
+                <div className="w-6 h-0.5 border-t-2 border-dashed border-[#94a6f0]" />
               </div>
 
               <div className="flex items-center justify-between">
@@ -919,8 +919,8 @@ export default function PatternVisualPreview({
               </div>
 
               <div className="flex items-center justify-between pt-1 border-t border-stone-200/50">
-                <span className="font-bold text-[#8e4a23]">Molde Cru Recomendado (wetSize)</span>
-                <div className="w-6 h-0.5 bg-[#8e4a23]" />
+                <span className="font-bold text-[#2c4cdb]">Molde Cru Recomendado (wetSize)</span>
+                <div className="w-6 h-0.5 bg-[#2c4cdb]" />
               </div>
             </div>
           </div>

@@ -305,7 +305,7 @@ export default function VisualConverter({
         <!-- Text annotations -->
         <text x="${pad}" y="${pad + 15}" font-family="sans-serif" font-size="12" font-weight="bold" fill="#333333">CeraMold • Molde Cônico Vetorizado de Foto (1:1)</text>
         <text x="${pad}" y="${pad + 35}" font-family="sans-serif" font-size="10" fill="#666666">Ø Boca: ${realTopDiameter.toFixed(1)} cm | Ø Base: ${results.rawBot.toFixed(1)} cm | Altura: ${results.rawHeight.toFixed(1)} cm</text>
-        <text x="${pad}" y="${pad + 55}" font-family="sans-serif" font-size="10" fill="#8e4a23" font-weight="bold">Fator de Retração Aplicado: ${globalShrinkage}%</text>
+        <text x="${pad}" y="${pad + 55}" font-family="sans-serif" font-size="10" fill="#2c4cdb" font-weight="bold">Fator de Retração Aplicado: ${globalShrinkage}%</text>
         <text x="${pad}" y="${pad + 75}" font-family="sans-serif" font-size="10" fill="#888888">Medidas Molde Cru: Ø Boca: ${results.moldTop.toFixed(1)}cm | Ø Base: ${results.moldBot.toFixed(1)}cm | Altura: ${results.moldHeight.toFixed(1)}cm</text>
         <text x="${pad}" y="${pad + 95}" font-family="sans-serif" font-size="10" fill="#888888">Margem de costura: +${seam} cm incluído no contorno.</text>
       `;
@@ -441,7 +441,7 @@ export default function VisualConverter({
 
           {!imageSrc ? (
             /* Upload box */
-            <div className="border-2 border-dashed border-terracotta-200/60 rounded-2xl p-10 bg-[#fdfaf6]/30 hover:bg-terracotta-50/10 transition text-center flex flex-col items-center justify-center min-h-[340px]">
+            <div className="border-2 border-dashed border-terracotta-200/60 rounded-2xl p-10 bg-[#fafaf9]/30 hover:bg-terracotta-50/10 transition text-center flex flex-col items-center justify-center min-h-[340px]">
               <div className="p-4 bg-terracotta-100 rounded-full text-terracotta-500 mb-4 animate-pulse">
                 <Upload className="w-8 h-8" />
               </div>
@@ -503,7 +503,7 @@ export default function VisualConverter({
                     y1={`${topLine.y}%`}
                     x2={`${topLine.x2}%`}
                     y2={`${topLine.y}%`}
-                    stroke="#8e4a23"
+                    stroke="#2c4cdb"
                     strokeWidth="3"
                   />
                   {/* Bottom Line */}
