@@ -4,6 +4,7 @@ import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronR
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
 import { computeCylinderCapacity, computeConeCapacity, mlToOz } from '../utils/capacity';
+import SavedMoldsPanel from './SavedMoldsPanel';
 
 interface ParametricMoldsProps {
   shapeType: ShapeType;
@@ -159,9 +160,19 @@ export default function ParametricMolds({
         </div>
       </div>
 
+      {/* SAVED MOLDS LIBRARY (Supabase, shared, no login) */}
+      <SavedMoldsPanel
+        shapeType={shapeType}
+        params={params}
+        onLoad={(loadedShape, loadedParams) => {
+          setShapeType(loadedShape);
+          onChangeParams(loadedParams);
+        }}
+      />
+
       {/* COIN COMPARISON SCALE WIDGET */}
       <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-terracotta-100 shadow-sm overflow-hidden">
-        <button 
+        <button
           onClick={() => setShowScale(!showScale)}
           className="w-full px-4 py-3 flex items-center justify-between hover:bg-terracotta-50 transition-colors"
         >
