@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams } from '../types';
-import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup } from 'lucide-react';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
+import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora } from 'lucide-react';
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
-import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, mlToOz } from '../utils/capacity';
+import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, computeVaseCapacity, mlToOz } from '../utils/capacity';
 import SavedMoldsPanel from './SavedMoldsPanel';
 import { useAdminSession } from '../lib/adminAuth';
 
@@ -12,7 +12,7 @@ interface ParametricMoldsProps {
   shapeType: ShapeType;
   setShapeType: (type: ShapeType) => void;
   globalShrinkage: number;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
   onChangeParams: (newParams: any) => void;
 }
 
@@ -194,6 +194,24 @@ export default function ParametricMolds({
               </div>
             </div>
           </button>
+
+          {/* Vase */}
+          <button
+            onClick={() => setShapeType('vase')}
+            className={`p-3.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+              shapeType === 'vase'
+                ? 'bg-terracotta-500 text-white border-terracotta-600 shadow-md shadow-terracotta-500/10'
+                : 'bg-white/60 hover:bg-white border-terracotta-100 hover:border-terracotta-300 text-clay-900'
+            }`}
+          >
+            <Amphora className={`w-5 h-5 ${shapeType === 'vase' ? 'text-white' : 'text-terracotta-500'}`} />
+            <div>
+              <div className="text-xs font-bold font-sans">Jarra / Vaso</div>
+              <div className={`text-[10px] ${shapeType === 'vase' ? 'text-terracotta-100' : 'text-clay-900/50'}`}>
+                Corpo largo com gargalo estreito
+              </div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -274,6 +292,11 @@ export default function ParametricMolds({
             h = p.height || 9;
             w = Math.max(p.topDiameter || 18, p.bottomDiameter || 8);
             label = `Tigela/Bowl (${w.toFixed(1)} x ${h.toFixed(1)} cm)`;
+          } else if (shapeType === 'vase') {
+            const p = params as VaseParams;
+            h = p.height || 22;
+            w = Math.max(p.shoulderDiameter || 16, p.baseDiameter || 9, p.neckDiameter || 6);
+            label = `Jarra/Vaso (${w.toFixed(1)} x ${h.toFixed(1)} cm)`;
           }
 
           return { h: Math.max(0.5, h), w: Math.max(0.5, w), label };
@@ -1259,6 +1282,116 @@ export default function ParametricMolds({
           </div>
         )}
 
+        {shapeType === 'vase' && (
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1 h-4 bg-terracotta-400 rounded-full" />
+                <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Dimensões da Jarra</h5>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SliderInput
+                  label="Ø Base"
+                  tip="Diâmetro do pé da jarra"
+                  value={(params as VaseParams).baseDiameter}
+                  min={3}
+                  max={25}
+                  step={0.5}
+                  onChange={(val) => handleUpdate('baseDiameter', val)}
+                />
+                <SliderInput
+                  label="Ø Ombro"
+                  tip="Diâmetro do ponto mais largo (barriga da jarra)"
+                  value={(params as VaseParams).shoulderDiameter}
+                  min={5}
+                  max={40}
+                  step={0.5}
+                  onChange={(val) => handleUpdate('shoulderDiameter', val)}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SliderInput
+                  label="Ø Gargalo"
+                  tip="Diâmetro da abertura no topo"
+                  value={(params as VaseParams).neckDiameter}
+                  min={2}
+                  max={20}
+                  step={0.5}
+                  onChange={(val) => handleUpdate('neckDiameter', val)}
+                />
+                <SliderInput
+                  label="Altura"
+                  tip="Altura final desejada"
+                  value={(params as VaseParams).height}
+                  min={6}
+                  max={45}
+                  step={0.5}
+                  onChange={(val) => handleUpdate('height', val)}
+                />
+              </div>
+              <SliderInput
+                label="Posição do Ombro"
+                tip="Quão perto da base fica o ponto mais largo — valores baixos = barriga perto do chão, altos = perto do gargalo"
+                value={(params as VaseParams).shoulderPosition}
+                min={20}
+                max={80}
+                step={5}
+                unit="%"
+                onChange={(val) => handleUpdate('shoulderPosition', val)}
+              />
+              <SliderInput
+                label="Curvatura"
+                tip="0 = segmentos retos (como dois cones unidos), 100 = barriga bem arredondada"
+                value={(params as VaseParams).curvature}
+                min={0}
+                max={100}
+                step={5}
+                unit="%"
+                onChange={(val) => handleUpdate('curvature', val)}
+              />
+              <SliderInput
+                label="Espessura da Parede"
+                tip="Espessura da placa de argila; usada para estimar a capacidade interna"
+                value={(params as VaseParams).wallThickness ?? 0.6}
+                min={0.3}
+                max={2.0}
+                step={0.1}
+                onChange={(val) => handleUpdate('wallThickness', val)}
+              />
+              <CapacityCard
+                {...computeVaseCapacity(
+                  (params as VaseParams).baseDiameter,
+                  (params as VaseParams).shoulderDiameter,
+                  (params as VaseParams).neckDiameter,
+                  (params as VaseParams).height,
+                  (params as VaseParams).shoulderPosition,
+                  (params as VaseParams).curvature,
+                  (params as VaseParams).wallThickness ?? 0.6
+                )}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1 h-4 bg-amber-400 rounded-full" />
+                <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Montagem</h5>
+              </div>
+              <SliderInput
+                label="Margem de Costura"
+                tip="Largura extra para colagem entre as bandas empilhadas"
+                value={(params as VaseParams).seamAllowance}
+                min={0.2}
+                max={4.0}
+                step={0.1}
+                onChange={(val) => handleUpdate('seamAllowance', val)}
+              />
+              <p className="text-[10px] text-clay-900/40 font-sans leading-relaxed">
+                O molde é impresso em 7 bandas empilhadas, da base até o gargalo — a banda do ombro é a mais larga e merece atenção extra na colagem.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* CLAY shrinkage linkage indicator */}
         <div className="mt-5 pt-4 border-t border-dashed border-terracotta-100/60 flex items-center justify-between text-xs font-sans">
           <div className="flex items-center gap-2 text-clay-900/60">
@@ -1308,6 +1441,11 @@ export default function ParametricMolds({
         {shapeType === 'bowl' && (
           <p className="text-clay-900/70 leading-relaxed">
             O molde da tigela sai em bandas empilhadas — junte-as em sequência, da base até a borda, alisando cada emenda por dentro e por fora com os dedos molhados antes de seguir para a próxima banda, assim a curva fica contínua e sem degraus visíveis.
+          </p>
+        )}
+        {shapeType === 'vase' && (
+          <p className="text-clay-900/70 leading-relaxed">
+            No ombro (o ponto mais largo), a argila tende a rachar se puxada rápido demais — trabalhe essa banda com calma, batendo levemente com a colher de borracha para compactar antes de seguir para o gargalo, que já é mais fino e fecha mais rápido.
           </p>
         )}
       </div>

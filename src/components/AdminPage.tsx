@@ -65,6 +65,14 @@ const DIMENSION_FIELDS: Record<ShapeType, { key: string; label: string }[]> = {
     { key: 'height', label: 'Altura (cm)' },
     { key: 'curvature', label: 'Curvatura (0-100)' },
   ],
+  vase: [
+    { key: 'baseDiameter', label: 'Ø Base (cm)' },
+    { key: 'shoulderDiameter', label: 'Ø Ombro (cm)' },
+    { key: 'neckDiameter', label: 'Ø Gargalo (cm)' },
+    { key: 'height', label: 'Altura (cm)' },
+    { key: 'shoulderPosition', label: 'Posição do Ombro (0-100)' },
+    { key: 'curvature', label: 'Curvatura (0-100)' },
+  ],
 };
 
 const SHAPE_LABELS: Record<ShapeType, string> = {
@@ -75,6 +83,7 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
   box: 'Caixa',
   organic_plate: 'Prato Orgânico',
   bowl: 'Tigela/Bowl',
+  vase: 'Jarra/Vaso',
 };
 
 const VALID_TABS: AdminTab[] = ['moldes', 'sugestoes', 'nova-referencia'];

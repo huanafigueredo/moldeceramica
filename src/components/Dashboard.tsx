@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
 import RetractionCalculator from './RetractionCalculator';
 import ParametricMolds from './ParametricMolds';
 import MoldVisualizer from './MoldVisualizer';
@@ -112,6 +112,18 @@ export default function Dashboard() {
     wallThickness: 0.6,
   });
 
+  const [vaseParams, setVaseParams] = useState<VaseParams>({
+    baseDiameter: 9,
+    shoulderDiameter: 16,
+    neckDiameter: 6,
+    height: 22,
+    shoulderPosition: 60,
+    curvature: 60,
+    shrinkage: 12.0,
+    seamAllowance: 1.0,
+    wallThickness: 0.6,
+  });
+
   // Printing mosaic modal states
   const [printRequest, setPrintRequest] = useState<{
     svgString: string;
@@ -128,6 +140,7 @@ export default function Dashboard() {
     setBoxParams((p) => ({ ...p, shrinkage: newShrinkage }));
     setOrganicPlateParams((p) => ({ ...p, shrinkage: newShrinkage }));
     setBowlParams((p) => ({ ...p, shrinkage: newShrinkage }));
+    setVaseParams((p) => ({ ...p, shrinkage: newShrinkage }));
   };
 
   const getActiveParams = () => {
@@ -146,6 +159,8 @@ export default function Dashboard() {
         return organicPlateParams;
       case 'bowl':
         return bowlParams;
+      case 'vase':
+        return vaseParams;
     }
   };
 
@@ -177,6 +192,9 @@ export default function Dashboard() {
       case 'bowl':
         setBowlParams(newParams);
         break;
+      case 'vase':
+        setVaseParams(newParams);
+        break;
     }
   };
 
@@ -199,6 +217,8 @@ export default function Dashboard() {
       setOrganicPlateParams(selectedParams);
     } else if (normalized === 'bowl') {
       setBowlParams(selectedParams);
+    } else if (normalized === 'vase') {
+      setVaseParams(selectedParams);
     }
     // Switch to mold generator view and scroll smoothly to the workspace
     goToTab('generator');

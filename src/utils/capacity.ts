@@ -4,6 +4,7 @@
  */
 
 import { bowlRadiusAt } from './bowlShape';
+import { vaseRadiusAt } from './vaseShape';
 
 const ML_PER_OZ = 29.5735;
 // How far below the rim a piece is realistically filled to before it risks
@@ -73,6 +74,45 @@ export function computeBowlCapacity(
     // h is measured from the base, over the piece's full (wall-inclusive) height
     const t = Math.min(1, h / height);
     const outerR = bowlRadiusAt(t, bottomDiameter / 2, topDiameter / 2, curvature);
+    return Math.max(0, outerR - wallThickness);
+  };
+
+  const integrate = (upToHeight: number): number => {
+    let volume = 0;
+    const step = upToHeight / slices;
+    for (let i = 0; i < slices; i++) {
+      const rBottom = innerRadiusAt(i * step);
+      const rTop = innerRadiusAt((i + 1) * step);
+      volume += frustumVolume(rBottom, rTop, step);
+    }
+    return volume;
+  };
+
+  return {
+    brimFullMl: integrate(innerHeight),
+    practicalMl: integrate(practicalHeight),
+  };
+}
+
+export function computeVaseCapacity(
+  baseDiameter: number,
+  shoulderDiameter: number,
+  neckDiameter: number,
+  height: number,
+  shoulderPosition: number,
+  curvature: number,
+  wallThickness: number
+): CapacityEstimate {
+  const innerHeight = Math.max(0, height - wallThickness);
+  if (innerHeight <= 0) return { brimFullMl: 0, practicalMl: 0 };
+
+  const practicalHeight = Math.max(0, innerHeight - POUR_MARGIN_CM);
+  const slices = 60;
+  const shoulderT = shoulderPosition / 100;
+
+  const innerRadiusAt = (h: number) => {
+    const t = Math.min(1, h / height);
+    const outerR = vaseRadiusAt(t, baseDiameter / 2, shoulderDiameter / 2, neckDiameter / 2, shoulderT, curvature);
     return Math.max(0, outerR - wallThickness);
   };
 

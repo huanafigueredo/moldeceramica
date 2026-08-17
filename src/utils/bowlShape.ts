@@ -35,7 +35,7 @@ export function bowlRadiusAt(t: number, rBottom: number, rTop: number, curvature
   return rBottom + (rTop - rBottom) * tt;
 }
 
-function frustumBandGeometry(index: number, rBottom: number, rTop: number, bandHeight: number, seam: number): BandGeometry {
+export function frustumBandGeometry(index: number, rBottom: number, rTop: number, bandHeight: number, seam: number): BandGeometry {
   if (Math.abs(rTop - rBottom) < 0.01) {
     const circ = Math.PI * (rTop + rBottom);
     return {
