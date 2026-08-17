@@ -19,7 +19,7 @@ export default function AppHeader({ globalShrinkage }: AppHeaderProps) {
 
   return (
     <>
-      <header className="no-print sticky top-0 bg-white/70 backdrop-blur-md border-b border-terracotta-100/30 z-40 transition-colors">
+      <header className="no-print sticky top-0 w-full min-w-0 bg-white/70 backdrop-blur-md border-b border-terracotta-100/30 z-40 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-terracotta-500 flex items-center justify-center text-white shadow-sm">
@@ -45,8 +45,8 @@ export default function AppHeader({ globalShrinkage }: AppHeaderProps) {
         </div>
       </header>
 
-      <div className="no-print max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="flex bg-white/50 p-1 rounded-2xl border border-terracotta-100/50 mb-8 gap-1 overflow-x-auto">
+      <div className="no-print w-full min-w-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="flex bg-white/50 p-1 rounded-2xl border border-terracotta-100/50 mb-8 gap-1 overflow-x-auto min-w-0">
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
