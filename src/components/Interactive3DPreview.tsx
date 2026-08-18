@@ -177,12 +177,38 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
       const h = p.desiredHeight * sizeMultiplier;
       const segments = 24;
 
+      // How far the rim dips below the flat full-height top at a given
+      // angle, matching (in spirit, at this preview's coarser resolution)
+      // the scalloped/wave cut drawn on the actual printed pattern in
+      // Pattern2DCanvas/MoldVisualizer — otherwise the 3D preview always
+      // showed a flat rim regardless of the edge finish the user picked.
+      const edge = p.edgeFinish || 'straight';
+      const circumference = 2 * Math.PI * r;
+      let edgeDrop = (_theta: number) => 0;
+      if (edge === 'scalloped') {
+        const scallopW = 4 * sizeMultiplier;
+        const n = Math.max(2, Math.round(circumference / scallopW));
+        const scallopWActual = circumference / n;
+        const scallopH = Math.min(0.48 * sizeMultiplier, scallopWActual / 2.5);
+        edgeDrop = (theta: number) => {
+          const pos = ((theta % (2 * Math.PI)) / (2 * Math.PI)) * n;
+          const frac = pos - Math.floor(pos);
+          const bump = Math.abs(frac - 0.5) * 2; // 0 at scallop center, 1 at each seam
+          return bump * bump * scallopH;
+        };
+      } else if (edge === 'wave') {
+        const amplitude = 0.32 * sizeMultiplier;
+        const offset = 0.40 * sizeMultiplier;
+        const cycles = Math.max(1, Math.round(circumference / (6 * sizeMultiplier)));
+        edgeDrop = (theta: number) => offset - amplitude * Math.sin((theta / (2 * Math.PI)) * cycles * 2 * Math.PI);
+      }
+
       // Top circular rim
       for (let i = 0; i < segments; i++) {
         const theta = (i * 2 * Math.PI) / segments;
         vertices.push({
           x: r * Math.cos(theta),
-          y: h / 2,
+          y: h / 2 - edgeDrop(theta),
           z: r * Math.sin(theta),
         });
       }
@@ -224,7 +250,6 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
 
       // Generate decorative hole patterns
       if (p.hasHoles) {
-        const hRad = p.holeDiameter / 2;
         const cols = Math.max(1, Math.floor((Math.PI * p.desiredDiameter) / p.holeSpacing));
         const rows = Math.max(1, Math.floor(p.desiredHeight / p.holeSpacing));
         const holeSpacingY = h / (rows + 1);
@@ -421,12 +446,77 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
         });
       };
 
+      // Height profile (0..h) across the plate's width, for the top edge
+      // cut — mirrors drawPlatePerimeter() in Pattern2DCanvas.tsx so the 3D
+      // preview's side plates actually show the rounded/scalloped edge the
+      // user picked, instead of always rendering a flat rectangle.
+      const finish = p.edgeFinish || 'straight';
+      const xs: number[] = [];
+      const heights: number[] = [];
+      if (finish === 'straight') {
+        xs.push(-w / 2, w / 2);
+        heights.push(h, h);
+      } else if (finish === 'rounded') {
+        const steps = 32;
+        const rArch = Math.min(w / 2, h);
+        for (let i = 0; i <= steps; i++) {
+          const frac = i / steps;
+          xs.push(-w / 2 + frac * w);
+          heights.push((h - rArch) + rArch * Math.sin(frac * Math.PI));
+        }
+      } else {
+        // scalloped
+        const scallopW = 4;
+        const n = Math.max(2, Math.round(w / scallopW));
+        const segW = w / n;
+        const segH = Math.min(0.6, segW / 2.5);
+        const perScallop = 8;
+        for (let i = 0; i < n; i++) {
+          for (let s = 0; s <= perScallop; s++) {
+            const frac = s / perScallop;
+            const bump = Math.abs(frac - 0.5) * 2;
+            xs.push(-w / 2 + i * segW + frac * segW);
+            heights.push(h - bump * bump * segH);
+          }
+        }
+      }
+
+      // Extrude the profile along Z into a solid plate: bottom/top edges,
+      // front/back faces, and end caps at both sides.
+      const addProfiledPlate = (cz: number) => {
+        const yBottom = t / 2 - h / 2;
+        const zFront = cz + t / 2;
+        const zBack = cz - t / 2;
+        const n = xs.length;
+        const base = vertices.length;
+
+        for (let i = 0; i < n; i++) {
+          const yTop = yBottom + heights[i];
+          vertices.push({ x: xs[i], y: yBottom, z: zFront }); // base+i*4+0
+          vertices.push({ x: xs[i], y: yTop, z: zFront });    // base+i*4+1
+          vertices.push({ x: xs[i], y: yBottom, z: zBack });  // base+i*4+2
+          vertices.push({ x: xs[i], y: yTop, z: zBack });     // base+i*4+3
+        }
+
+        for (let i = 0; i < n - 1; i++) {
+          const a = base + i * 4;
+          const b = base + (i + 1) * 4;
+          faces.push({ indices: [a, a + 1, b + 1, b], color: baseColor, outlineColor: edgeColor }); // front
+          faces.push({ indices: [a + 2, b + 2, b + 3, a + 3], color: baseColor, outlineColor: edgeColor }); // back
+          faces.push({ indices: [a + 1, a + 3, b + 3, b + 1], color: baseColor, outlineColor: edgeColor }); // top edge
+        }
+        faces.push({ indices: [base, base + 2, base + (n - 1) * 4 + 2, base + (n - 1) * 4], color: baseColor, outlineColor: edgeColor }); // bottom
+        faces.push({ indices: [base, base + 1, base + 3, base + 2], color: baseColor, outlineColor: edgeColor }); // left end cap
+        const last = base + (n - 1) * 4;
+        faces.push({ indices: [last + 2, last + 3, last + 1, last], color: baseColor, outlineColor: edgeColor }); // right end cap
+      };
+
       // Base Plate
       addCuboid(0, -h/2 + t/2, 0, w, t, d - 2*t, stateMode === 'wet' ? '#bb8e7a' : '#b74c27');
       // Left Plate
-      addCuboid(0, t/2, -d/2 + t/2, w, h, t, baseColor);
+      addProfiledPlate(-d / 2 + t / 2);
       // Right Plate
-      addCuboid(0, t/2, d/2 - t/2, w, h, t, baseColor);
+      addProfiledPlate(d / 2 - t / 2);
     }
     else if (shapeType === 'box') {
       const p = params as BoxParams;

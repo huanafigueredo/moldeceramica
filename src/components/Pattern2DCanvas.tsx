@@ -310,13 +310,20 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     data: any
   ) => {
     ctx.save();
-    const holeRad = (p.holeDiameter / 2) * scale;
-    const holeDist = p.holeSpacing * scale;
-    const cols = Math.max(1, Math.floor((data.bboxW - p.seamAllowance - 2) / p.holeSpacing));
-    const rows = Math.max(1, Math.floor((data.bboxH - 2) / p.holeSpacing));
+    // holeDiameter/holeSpacing are the user's desired FINAL (post-firing)
+    // sizes, like every other dimension here — must convert to mold-scale
+    // before drawing, or the holes print smaller than promised once the
+    // clay shrinks.
+    const shrinkFactor = 1 - p.shrinkage / 100;
+    const holeDiameter_mold = p.holeDiameter / shrinkFactor;
+    const holeSpacing_mold = p.holeSpacing / shrinkFactor;
+    const holeRad = (holeDiameter_mold / 2) * scale;
+    const holeDist = holeSpacing_mold * scale;
+    const cols = Math.max(1, Math.floor((data.bboxW - p.seamAllowance - 2) / holeSpacing_mold));
+    const rows = Math.max(1, Math.floor((data.bboxH - 2) / holeSpacing_mold));
 
-    const xStart = (data.bboxW - p.seamAllowance - (cols - 1) * p.holeSpacing) * scale / 2;
-    const yStart = (data.bboxH - (rows - 1) * p.holeSpacing) * scale / 2;
+    const xStart = (data.bboxW - p.seamAllowance - (cols - 1) * holeSpacing_mold) * scale / 2;
+    const yStart = (data.bboxH - (rows - 1) * holeSpacing_mold) * scale / 2;
     const shape = p.holeShape || 'circle';
 
     ctx.strokeStyle = '#2c4cdb';
