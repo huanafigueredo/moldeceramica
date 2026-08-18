@@ -62,8 +62,11 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, w, h);
 
-    // Padding around the pattern
-    const padding = 50;
+    // Padding around the pattern — generous enough that the trailing summary
+    // label some shapes draw a fixed ~30-40px below their own bounding box
+    // (e.g. drawBowl's "Tigela: Ø Borda..." line) doesn't get clipped by the
+    // canvas edge at the default fit-to-view zoom.
+    const padding = 65;
 
     // Calculate bounding box and centering scale — use the wider view bbox
     // (body + handle strip) when present, so the whole pattern fits on screen
@@ -164,8 +167,12 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     ctx.fillStyle = '#17171a';
     ctx.font = '500 10px "JetBrains Mono", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Escala Real: ${barCm} cm`, startX + barPx / 2, startY - 7);
+    // Right-align to the canvas edge rather than centering over the bar —
+    // when the fitted scale is very small (e.g. a Bowl/Vase with several
+    // thin bands), the 5cm bar itself shrinks to just a few px, but the
+    // label text stays the same width and was overflowing past the edge.
+    ctx.textAlign = 'right';
+    ctx.fillText(`Escala Real: ${barCm} cm`, w - 15, startY - 7);
     ctx.restore();
   };
 
@@ -299,6 +306,29 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
     }
     ctx.restore();
 
+    ctx.restore();
+  };
+
+  // Helper: for a thin annular band whose theoretical cone apex sits far
+  // above the printed ring itself (shallow-taper bands cut from a wide
+  // radius — common on curved-wall Bowl/Vase/Sketch shapes), the reserved
+  // space between the apex and the ring reads as an unexplained empty gap.
+  // A faint construction line back to the apex signals "this blank space is
+  // geometry, not a rendering glitch" instead of leaving it looking broken.
+  const drawApexGuide = (ctx: CanvasRenderingContext2D, apexX: number, apexY: number, innerR: number) => {
+    if (innerR < 24) return; // negligible gap — not worth the extra line
+    ctx.save();
+    ctx.strokeStyle = 'rgba(44, 76, 219, 0.25)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.moveTo(apexX, apexY);
+    ctx.lineTo(apexX, apexY + innerR);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(apexX, apexY, 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(44, 76, 219, 0.35)';
+    ctx.fill();
     ctx.restore();
   };
 
@@ -827,6 +857,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+      drawApexGuide(ctx, apexX, apexY, L_inner_px);
 
       if (showSeam && d.seam > 0) {
         ctx.save();
@@ -930,6 +961,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+      drawApexGuide(ctx, apexX, apexY, L_inner_px);
 
       if (showSeam && d.seam > 0) {
         ctx.save();
@@ -1038,6 +1070,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+      drawApexGuide(ctx, apexX, apexY, L_inner_px);
 
       if (showSeam && d.seam > 0) {
         ctx.save();
@@ -1530,6 +1563,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
           onClick={() => setZoom(z => Math.min(3, z + 0.15))}
           className="p-1.5 hover:bg-terracotta-50 rounded-lg text-clay-900/70 hover:text-terracotta-600 transition"
           title="Aumentar Zoom"
+          aria-label="Aumentar zoom"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
@@ -1537,6 +1571,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
           onClick={() => setZoom(z => Math.max(0.4, z - 0.15))}
           className="p-1.5 hover:bg-terracotta-50 rounded-lg text-clay-900/70 hover:text-terracotta-600 transition"
           title="Diminuir Zoom"
+          aria-label="Diminuir zoom"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
@@ -1544,6 +1579,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
           onClick={resetView}
           className="p-1.5 hover:bg-stone-100 rounded-lg text-clay-900/50 hover:text-clay-900 transition border-t border-stone-100 mt-1"
           title="Resetar Visualização"
+          aria-label="Resetar visualização do molde"
         >
           <RotateCcw className="w-3.5 h-3.5" />
         </button>

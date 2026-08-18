@@ -309,6 +309,8 @@ export function Slab3DCanvas({
             isRotating ? 'border-terracotta-200 text-terracotta-600 bg-terracotta-50' : 'border-stone-200 text-stone-500 hover:bg-stone-50'
           }`}
           title={isRotating ? "Pausar Rotação" : "Ativar Rotação"}
+          aria-label={isRotating ? "Pausar rotação automática" : "Ativar rotação automática"}
+          aria-pressed={isRotating}
         >
           <RotateCw className={`w-3.5 h-3.5 ${isRotating ? 'animate-spin [animation-duration:10s]' : ''}`} />
         </button>
@@ -316,6 +318,7 @@ export function Slab3DCanvas({
           onClick={() => orbitRef.current?.reset()}
           className="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-stone-200 text-stone-500 hover:bg-stone-50 transition text-xs shadow-sm"
           title="Resetar Câmera"
+          aria-label="Resetar câmera para posição inicial"
         >
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
@@ -496,6 +499,8 @@ export default function Slab3DPreview(props: Slab3DPreviewProps) {
                 : 'bg-white border-clay-200 text-clay-500 hover:bg-clay-50'
             }`}
             title={isRotating ? "Pausar rotação automática" : "Ativar rotação automática"}
+            aria-label={isRotating ? "Pausar rotação automática" : "Ativar rotação automática"}
+            aria-pressed={isRotating}
           >
             <RotateCw className={`w-4 h-4 ${isRotating ? 'animate-spin [animation-duration:10s]' : ''}`} />
           </button>
@@ -503,6 +508,7 @@ export default function Slab3DPreview(props: Slab3DPreviewProps) {
             onClick={resetCamera}
             className="p-2 rounded-xl bg-white border border-clay-200 text-clay-500 hover:bg-clay-50 transition shadow-sm"
             title="Resetar Câmera"
+            aria-label="Resetar câmera para posição inicial"
           >
             <RefreshCw className="w-4 h-4" />
           </button>

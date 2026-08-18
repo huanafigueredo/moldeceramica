@@ -171,6 +171,7 @@ export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMold
                       onClick={() => onLoad(mold.shape_type, mold.params)}
                       className="p-1.5 rounded-lg bg-white hover:bg-terracotta-100 border border-terracotta-100 text-terracotta-600 transition"
                       title="Carregar este molde"
+                      aria-label={`Carregar molde ${mold.name}`}
                     >
                       <FolderOpen className="w-3.5 h-3.5" />
                     </button>
@@ -179,6 +180,7 @@ export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMold
                         onClick={() => handleDelete(mold.id)}
                         className="p-1.5 rounded-lg bg-white hover:bg-red-50 border border-red-100/60 text-red-400 hover:text-red-600 transition"
                         title="Excluir"
+                        aria-label={`Excluir molde ${mold.name}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

@@ -1106,6 +1106,8 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
               : 'bg-white border-clay-200 text-clay-500 hover:bg-clay-50'
           }`}
           title={isSpinning ? "Pausar rotação automática" : "Ativar rotação automática"}
+          aria-label={isSpinning ? "Pausar rotação automática" : "Ativar rotação automática"}
+          aria-pressed={isSpinning}
         >
           <RotateCw className={`w-4 h-4 ${isSpinning ? 'animate-spin [animation-duration:8s]' : ''}`} />
         </button>
