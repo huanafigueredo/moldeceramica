@@ -1698,14 +1698,13 @@ export default function ParametricMolds({
           </div>
         )}
 
-        {/* CLAY shrinkage linkage indicator */}
+        {/* CLAY shrinkage linkage indicator — the % itself is already shown
+            once at the top of this same panel, so this line only confirms
+            the link and adds the one piece of info not shown elsewhere. */}
         <div className="mt-5 pt-4 border-t border-dashed border-terracotta-100/60 flex items-center justify-between text-xs font-sans">
           <div className="flex items-center gap-2 text-clay-900/60">
             <CheckCircle className="w-4 h-4 text-emerald-600" />
-            <span>Fator de Retração Vinculado:</span>
-            <span className="font-mono font-bold text-terracotta-500 bg-terracotta-50 px-2 py-0.5 rounded-md border border-terracotta-100/60">
-              {globalShrinkage}%
-            </span>
+            <span>Todas as medidas já compensam a retração acima</span>
           </div>
           <span className="text-clay-900/40 font-serif italic">1cm = 37.8px</span>
         </div>
