@@ -87,7 +87,7 @@ export default function AppHeader({ globalShrinkage }: AppHeaderProps) {
                   className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all whitespace-nowrap ${
                     isActive
                       ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100'
-                      : 'text-clay-900/40 hover:text-clay-900/70'
+                      : 'text-clay-900/55 hover:text-clay-900/80'
                   }`}
                 >
                   <Icon className="w-4 h-4" />

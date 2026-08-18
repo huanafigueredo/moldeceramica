@@ -153,6 +153,32 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
       ctx.textAlign = 'left';
       ctx.fillText('↑ borda', axisX + 6, 20);
       ctx.fillText('↓ base', axisX + 6, h - 12);
+
+      // Ghost example — an empty canvas gives no sense of what a valid
+      // stroke looks like, so trace a faint sample mug profile until the
+      // person draws their first stroke.
+      if (strokes.length === 0) {
+        const gBase = { x: axisX + 6, y: h - 24 };
+        const gBody = { x: axisX + Math.min(90, w * 0.22), y: h * 0.62 };
+        const gShoulder = { x: axisX + Math.min(70, w * 0.17), y: h * 0.32 };
+        const gRim = { x: axisX + Math.min(48, w * 0.12), y: 24 };
+        ctx.strokeStyle = '#9ca3af';
+        ctx.globalAlpha = 0.4;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.setLineDash([1, 7]);
+        ctx.beginPath();
+        ctx.moveTo(gBase.x, gBase.y);
+        ctx.quadraticCurveTo(gBody.x + 20, gBody.y + 40, gBody.x, gBody.y);
+        ctx.quadraticCurveTo(gBody.x - 10, gShoulder.y + 20, gShoulder.x, gShoulder.y);
+        ctx.lineTo(gRim.x, gRim.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = 'italic 9px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('exemplo: perfil de uma caneca', gBody.x + 14, gBody.y);
+        ctx.globalAlpha = 1;
+      }
     } else {
       // cm grid
       ctx.strokeStyle = 'rgba(44,76,219,0.08)';
@@ -291,8 +317,10 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
         </div>
 
         {/* Mode tabs */}
-        <div className="flex bg-clay-50 p-1 rounded-xl border border-terracotta-100/30 mb-5 w-fit">
+        <div role="tablist" aria-label="Tipo de desenho" className="flex bg-clay-50 p-1 rounded-xl border border-terracotta-100/30 mb-5 w-fit">
           <button
+            role="tab"
+            aria-selected={mode === 'profile'}
             onClick={() => handleModeChange('profile')}
             className={`px-3.5 py-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition ${
               mode === 'profile' ? 'bg-white text-terracotta-600 shadow-sm' : 'text-clay-900/40 hover:text-clay-900/70'
@@ -302,6 +330,8 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
             Perfil Lateral (redondo)
           </button>
           <button
+            role="tab"
+            aria-selected={mode === 'outline'}
             onClick={() => handleModeChange('outline')}
             className={`px-3.5 py-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition ${
               mode === 'outline' ? 'bg-white text-terracotta-600 shadow-sm' : 'text-clay-900/40 hover:text-clay-900/70'

@@ -162,7 +162,7 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex bg-white/50 p-1 rounded-2xl border border-terracotta-100/50 mb-8 gap-1 overflow-x-auto w-fit">
+        <div role="tablist" aria-label="Seções do painel admin" className="flex bg-white/50 p-1 rounded-2xl border border-terracotta-100/50 mb-8 gap-1 overflow-x-auto w-fit">
           <TabButton active={tab === 'moldes'} onClick={() => setTab('moldes')} icon={BookMarked} label="Moldes Salvos" />
           <TabButton active={tab === 'sugestoes'} onClick={() => setTab('sugestoes')} icon={Lightbulb} label="Sugestões" />
           <TabButton active={tab === 'nova-referencia'} onClick={() => setTab('nova-referencia')} icon={PlusCircle} label="Nova Referência" />
@@ -179,6 +179,8 @@ export default function AdminPage() {
 function TabButton({ active, onClick, icon: Icon, label }: { active: boolean; onClick: () => void; icon: any; label: string }) {
   return (
     <button
+      role="tab"
+      aria-selected={active}
       onClick={onClick}
       className={`px-4 py-2.5 text-xs font-bold flex items-center gap-2 rounded-xl transition-all whitespace-nowrap ${
         active ? 'bg-white text-terracotta-600 shadow-sm border border-terracotta-100' : 'text-clay-900/40 hover:text-clay-900/70'

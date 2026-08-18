@@ -1042,8 +1042,10 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
         </div>
 
         {/* State Toggle Selector */}
-        <div className="flex bg-clay-100/80 p-1 rounded-xl self-start sm:self-auto border border-terracotta-100/30">
+        <div role="tablist" aria-label="Estado da peça" className="flex bg-clay-100/80 p-1 rounded-xl self-start sm:self-auto border border-terracotta-100/30">
           <button
+            role="tab"
+            aria-selected={stateMode === 'fired'}
             onClick={() => setStateMode('fired')}
             className={`px-3 py-1.5 rounded-lg text-xs font-sans font-bold transition flex items-center gap-1.5 ${
               stateMode === 'fired'
@@ -1055,6 +1057,8 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
             Peça Pronta (Fired)
           </button>
           <button
+            role="tab"
+            aria-selected={stateMode === 'wet'}
             onClick={() => setStateMode('wet')}
             className={`px-3 py-1.5 rounded-lg text-xs font-sans font-bold transition flex items-center gap-1.5 ${
               stateMode === 'wet'

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
-import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora, Pencil, AlertTriangle, Sparkles, X } from 'lucide-react';
+import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora, Pencil, AlertTriangle, Sparkles, X, Minus, Plus } from 'lucide-react';
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
 import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, computeVaseCapacity, computeSketchCapacity, mlToOz } from '../utils/capacity';
@@ -24,6 +24,11 @@ export default function ParametricMolds({
   onChangeParams,
 }: ParametricMoldsProps) {
   const [showScale, setShowScale] = React.useState(false);
+  // Detail sliders for decorative holes start collapsed — the toggle above
+  // still controls whether the mold HAS holes (default on for the lamp
+  // preset), this just keeps the panel shorter until someone actually wants
+  // to fine-tune diameter/spacing/shape instead of using the defaults.
+  const [showHoleDetails, setShowHoleDetails] = React.useState(false);
   const { isAdmin } = useAdminSession();
 
   // First-time orientation banner — a new user otherwise lands straight
@@ -250,20 +255,23 @@ export default function ParametricMolds({
             </div>
           </button>
 
-          {/* Sketch-to-mold shortcut */}
+          {/* Sketch-to-mold shortcut — most differentiated feature in the
+              app (freehand profile, auto-straightened into a mold), so it
+              gets the same visual weight as the parametric shapes instead
+              of reading as a secondary/experimental option. */}
           <Link
             to="/desenhar"
             className={`p-3.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
               shapeType === 'sketch'
                 ? 'bg-terracotta-500 text-white border-terracotta-600 shadow-md shadow-terracotta-500/10'
-                : 'bg-white/60 hover:bg-white border-dashed border-terracotta-200 hover:border-terracotta-300 text-clay-900'
+                : 'bg-white/60 hover:bg-white border-terracotta-100 hover:border-terracotta-300 text-clay-900'
             }`}
           >
             <Pencil className={`w-5 h-5 ${shapeType === 'sketch' ? 'text-white' : 'text-terracotta-500'}`} />
             <div>
               <div className="text-xs font-bold font-sans">Desenhar Minha Forma</div>
               <div className={`text-[10px] ${shapeType === 'sketch' ? 'text-terracotta-100' : 'text-clay-900/50'}`}>
-                Esboce o contorno e a gente endireita
+                Não achou a forma pronta? Esboce o contorno e a gente endireita.
               </div>
             </div>
           </Link>
@@ -280,23 +288,30 @@ export default function ParametricMolds({
         }}
       />
 
-      {/* COIN COMPARISON SCALE WIDGET */}
-      <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-terracotta-100 shadow-sm overflow-hidden">
+      {/* COIN COMPARISON SCALE WIDGET — a real trust-builder for a
+          print-and-cut workflow, so it gets a tinted card instead of the
+          same plain list-row treatment as "Moldes Salvos" above it. */}
+      <div className="rounded-2xl border border-terracotta-200/70 shadow-sm overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(44,76,219,0.06), rgba(44,76,219,0.02))' }}>
         <button
           onClick={() => setShowScale(!showScale)}
-          className="w-full px-4 py-3 flex items-center justify-between hover:bg-terracotta-50 transition-colors"
+          className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/40 transition-colors"
         >
-          <div className="flex items-center gap-2">
-            <Compass className="w-4 h-4 text-terracotta-500" />
-            <h5 className="text-[11px] font-bold text-clay-900/70 uppercase tracking-wider font-sans">
-              Escala de Proporção Real
-            </h5>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-terracotta-500/10 flex items-center justify-center">
+              <Compass className="w-4 h-4 text-terracotta-600" />
+            </div>
+            <div className="text-left">
+              <h5 className="text-[11px] font-bold text-clay-900 uppercase tracking-wider font-sans">
+                Escala de Proporção Real
+              </h5>
+              <span className="text-[9.5px] text-clay-900/45 font-sans">Confira o tamanho antes de imprimir</span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-             <span className="text-[10px] text-clay-900/40 font-sans">
+             <span className="text-[10px] text-clay-900/45 font-sans">
                {showScale ? 'Ocultar' : 'Comparar com moeda'}
              </span>
-             <ChevronRight className={`w-4 h-4 text-clay-900/30 transition-transform ${showScale ? 'rotate-90' : ''}`} />
+             <ChevronRight className={`w-4 h-4 text-clay-900/40 transition-transform ${showScale ? 'rotate-90' : ''}`} />
           </div>
         </button>
 
@@ -765,7 +780,7 @@ export default function ParametricMolds({
                   onChange={(val) => handleUpdate('seamAllowance', val)}
                 />
                 <div className="p-3.5 bg-white/60 border border-terracotta-100/40 rounded-xl shadow-xs">
-                  {labelWithTip("Borda Superior", "Estilo de corte decorativo")}
+                  {labelWithTip("Borda Superior", "Como o topo é cortado: reto, ondulado ou recortado. Só estética — não muda a capacidade.")}
                   <select
                     value={(params as CylinderParams).edgeFinish || 'straight'}
                     onChange={(e) => handleUpdate('edgeFinish', e.target.value)}
@@ -798,41 +813,53 @@ export default function ParametricMolds({
               </div>
 
               {(params as CylinderParams).hasHoles && (
-                <div className="space-y-4 p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <SliderInput
-                      label="Diâmetro Furo"
-                      tip="Tamanho final de cada furo"
-                      value={(params as CylinderParams).holeDiameter}
-                      min={0.1}
-                      max={3.0}
-                      step={0.1}
-                      onChange={(val) => handleUpdate('holeDiameter', val)}
-                    />
-                    <SliderInput
-                      label="Espaçamento"
-                      tip="Distância entre furos"
-                      value={(params as CylinderParams).holeSpacing}
-                      min={0.5}
-                      max={10.0}
-                      step={0.1}
-                      onChange={(val) => handleUpdate('holeSpacing', val)}
-                    />
-                  </div>
-                  <div className="p-3.5 bg-white/80 border border-indigo-100/40 rounded-xl shadow-xs">
-                    {labelWithTip("Formato do Vazado", "Design geométrico dos furos")}
-                    <select
-                      value={(params as CylinderParams).holeShape || 'circle'}
-                      onChange={(e) => handleUpdate('holeShape', e.target.value)}
-                      className="w-full bg-white border border-indigo-100 rounded-xl px-3 py-2 text-clay-900 text-xs font-medium focus:outline-none focus:border-indigo-500 shadow-2xs mt-1"
-                    >
-                      <option value="circle">● Círculo</option>
-                      <option value="square">■ Quadrado</option>
-                      <option value="flower">✿ Flor</option>
-                      <option value="star">★ Estrela</option>
-                      <option value="rectangle">▬ Fenda</option>
-                    </select>
-                  </div>
+                <div className="rounded-2xl border border-indigo-100/50 bg-indigo-50/30 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowHoleDetails((v) => !v)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-[10px] font-bold text-indigo-700/70 hover:text-indigo-700 uppercase tracking-wider transition"
+                  >
+                    Ajustar diâmetro, espaçamento e formato
+                    <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showHoleDetails ? 'rotate-90' : ''}`} />
+                  </button>
+                  {showHoleDetails && (
+                    <div className="space-y-4 p-4 pt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <SliderInput
+                          label="Diâmetro Furo"
+                          tip="Tamanho final de cada furo"
+                          value={(params as CylinderParams).holeDiameter}
+                          min={0.1}
+                          max={3.0}
+                          step={0.1}
+                          onChange={(val) => handleUpdate('holeDiameter', val)}
+                        />
+                        <SliderInput
+                          label="Espaçamento"
+                          tip="Distância entre furos"
+                          value={(params as CylinderParams).holeSpacing}
+                          min={0.5}
+                          max={10.0}
+                          step={0.1}
+                          onChange={(val) => handleUpdate('holeSpacing', val)}
+                        />
+                      </div>
+                      <div className="p-3.5 bg-white/80 border border-indigo-100/40 rounded-xl shadow-xs">
+                        {labelWithTip("Formato do Vazado", "Forma de cada furo. Círculos são mais fáceis de furar sem rachar a argila crua.")}
+                        <select
+                          value={(params as CylinderParams).holeShape || 'circle'}
+                          onChange={(e) => handleUpdate('holeShape', e.target.value)}
+                          className="w-full bg-white border border-indigo-100 rounded-xl px-3 py-2 text-clay-900 text-xs font-medium focus:outline-none focus:border-indigo-500 shadow-2xs mt-1"
+                        >
+                          <option value="circle">● Círculo</option>
+                          <option value="square">■ Quadrado</option>
+                          <option value="flower">✿ Flor</option>
+                          <option value="star">★ Estrela</option>
+                          <option value="rectangle">▬ Fenda</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1139,7 +1166,7 @@ export default function ParametricMolds({
                   onChange={(val) => handleUpdate('thickness', val)}
                 />
                 <div className="p-3.5 bg-white/60 border border-terracotta-100/40 rounded-xl shadow-xs">
-                  {labelWithTip("Design", "Formato das placas")}
+                  {labelWithTip("Design", "Como a borda de cima das placas é cortada: reta, arredondada ou recortada. Só estética.")}
                   <select
                     value={(params as NapkinHolderParams).edgeFinish || 'straight'}
                     onChange={(e) => handleUpdate('edgeFinish', e.target.value)}
@@ -1766,6 +1793,15 @@ const SliderInput = ({
     clampTimeout.current = setTimeout(() => setClampMsg(null), 2500);
   };
 
+  // +/- buttons: precise adjustment on touchscreens, where hitting an exact
+  // value on a thin slider (e.g. 15.4 vs 15.0cm) is hard to do by hand.
+  const stepBy = (delta: number) => {
+    const raw = Math.max(min, Math.min(max, value + delta));
+    const rounded = Math.round(raw / step) * step;
+    const clamped = Math.max(min, Math.min(max, rounded));
+    onChange(Math.round(clamped * 1000) / 1000);
+  };
+
   return (
     <div className="space-y-1.5 p-3.5 bg-white/60 border border-terracotta-100/40 rounded-xl shadow-xs transition-all hover:bg-white/85 hover:border-terracotta-200">
       <div className="flex justify-between items-center gap-2">
@@ -1782,7 +1818,7 @@ const SliderInput = ({
           {value.toFixed(step >= 1 ? 0 : (step === 0.5 ? 1 : 2))} {unit}
         </span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center flex-wrap gap-y-2 gap-x-3">
         <input
           type="range"
           min={min}
@@ -1790,35 +1826,55 @@ const SliderInput = ({
           step={step}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value) || min)}
-          className="flex-1 accent-terracotta-500 h-1 bg-terracotta-100 rounded-lg cursor-pointer transition-all focus:ring-1 focus:ring-terracotta-200"
+          className="flex-1 min-w-[64px] accent-terracotta-500 h-1 bg-terracotta-100 rounded-lg cursor-pointer transition-all focus:ring-1 focus:ring-terracotta-200"
         />
-        <input
-          type="number"
-          min={min}
-          max={max}
-          step={step}
-          value={inputText}
-          onChange={(e) => {
-            const val = e.target.value;
-            setInputText(val);
-            const num = parseFloat(val);
-            if (!isNaN(num)) {
-              flagClamp(num);
-              onChange(Math.max(min, Math.min(max, num)));
-            }
-          }}
-          onBlur={() => {
-            if (inputText === "" || isNaN(parseFloat(inputText))) {
-              setInputText(value.toString());
-            }
-          }}
-          className="w-14 bg-clay-50/40 border border-terracotta-100/50 rounded-lg py-0.5 px-1 text-center text-[10px] font-mono font-semibold text-clay-800 focus:outline-none focus:border-terracotta-400 focus:bg-white"
-        />
+        <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+          <button
+            type="button"
+            onClick={() => stepBy(-step)}
+            disabled={value <= min}
+            aria-label={`Diminuir ${label}`}
+            className="w-7 h-7 flex items-center justify-center rounded-lg bg-clay-50/60 border border-terracotta-100/50 text-clay-900/50 hover:text-terracotta-600 hover:bg-terracotta-50 disabled:opacity-30 disabled:pointer-events-none transition"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+          <input
+            type="number"
+            min={min}
+            max={max}
+            step={step}
+            value={inputText}
+            onChange={(e) => {
+              const val = e.target.value;
+              setInputText(val);
+              const num = parseFloat(val);
+              if (!isNaN(num)) {
+                flagClamp(num);
+                onChange(Math.max(min, Math.min(max, num)));
+              }
+            }}
+            onBlur={() => {
+              if (inputText === "" || isNaN(parseFloat(inputText))) {
+                setInputText(value.toString());
+              }
+            }}
+            className="w-14 bg-clay-50/40 border border-terracotta-100/50 rounded-lg py-0.5 px-1 text-center text-[10px] font-mono font-semibold text-clay-800 focus:outline-none focus:border-terracotta-400 focus:bg-white"
+          />
+          <button
+            type="button"
+            onClick={() => stepBy(step)}
+            disabled={value >= max}
+            aria-label={`Aumentar ${label}`}
+            className="w-7 h-7 flex items-center justify-center rounded-lg bg-clay-50/60 border border-terracotta-100/50 text-clay-900/50 hover:text-terracotta-600 hover:bg-terracotta-50 disabled:opacity-30 disabled:pointer-events-none transition"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
       {clampMsg ? (
         <div className="text-[9px] text-terracotta-600 font-mono font-semibold">{clampMsg} — valor ajustado</div>
       ) : (
-        <div className="flex justify-between text-[8px] text-clay-900/30 font-mono select-none">
+        <div className="flex justify-between text-[8px] text-clay-900/55 font-mono select-none">
           <span>{min} {unit}</span>
           <span>{max} {unit}</span>
         </div>

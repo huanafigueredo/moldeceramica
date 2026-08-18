@@ -2058,8 +2058,10 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
   return (
     <div className="space-y-4 h-full flex flex-col">
       {/* 2D / 3D Mode Selector */}
-      <div className="flex bg-clay-50/80 p-1.5 rounded-2xl border border-terracotta-100/30 w-fit mx-auto sm:mx-0">
+      <div role="tablist" aria-label="Modo de visualização do molde" className="flex bg-clay-50/80 p-1.5 rounded-2xl border border-terracotta-100/30 w-fit mx-auto sm:mx-0">
         <button
+          role="tab"
+          aria-selected={viewMode === '3d'}
           onClick={() => setViewMode('3d')}
           className={`px-6 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
             viewMode === '3d'
@@ -2071,6 +2073,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
           3D
         </button>
         <button
+          role="tab"
+          aria-selected={viewMode === '2d_canvas'}
           onClick={() => setViewMode('2d_canvas')}
           className={`px-6 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
             viewMode === '2d_canvas'
@@ -2082,6 +2086,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
           Canvas 2D
         </button>
         <button
+          role="tab"
+          aria-selected={viewMode === '2d_svg'}
           onClick={() => setViewMode('2d_svg')}
           className={`px-6 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
             viewMode === '2d_svg'
@@ -2110,7 +2116,11 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                   <h3 className="font-serif text-lg font-bold text-clay-900">
                     {viewMode === '2d_canvas' ? 'Molde Interativo' : 'Molde Vetorial'}
                   </h3>
-                  <p className="text-[10px] text-clay-900/40 uppercase font-bold tracking-wider">Visualização 2D</p>
+                  <p className="text-[10px] text-clay-900/45 font-bold tracking-wider">
+                    {viewMode === '2d_canvas'
+                      ? 'Arraste e dê zoom pra conferir na tela'
+                      : 'O arquivo vetorial pronto pra exportar/imprimir'}
+                  </p>
                 </div>
               </div>
 
