@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
-import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora, Pencil } from 'lucide-react';
+import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora, Pencil, AlertTriangle, Sparkles, X } from 'lucide-react';
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
 import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, computeVaseCapacity, computeSketchCapacity, mlToOz } from '../utils/capacity';
@@ -26,6 +26,26 @@ export default function ParametricMolds({
   const [showScale, setShowScale] = React.useState(false);
   const { isAdmin } = useAdminSession();
 
+  // First-time orientation banner — a new user otherwise lands straight
+  // inside a fully-populated parameter form with no explanation of the
+  // basic flow, so this shows once and remembers it was dismissed.
+  const ONBOARDING_KEY = 'ceramold_onboarding_dismissed';
+  const [showOnboarding, setShowOnboarding] = React.useState(() => {
+    try {
+      return typeof window !== 'undefined' && !window.localStorage.getItem(ONBOARDING_KEY);
+    } catch {
+      return true;
+    }
+  });
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    try {
+      window.localStorage.setItem(ONBOARDING_KEY, '1');
+    } catch {
+      // localStorage unavailable (private mode etc.) — just hide for this session
+    }
+  };
+
   const handleUpdate = (key: string, value: any) => {
     onChangeParams({
       ...params,
@@ -48,7 +68,24 @@ export default function ParametricMolds({
 
   return (
     <div className="space-y-6">
-      {/* SHAPE SELECTOR */}
+      {showOnboarding && (
+        <div className="relative bg-terracotta-50/70 border border-terracotta-100 rounded-2xl p-4 pr-10 flex items-start gap-3">
+          <div className="w-7 h-7 shrink-0 bg-terracotta-500 rounded-lg flex items-center justify-center text-white">
+            <Sparkles className="w-3.5 h-3.5" />
+          </div>
+          <p className="text-xs text-clay-900/70 leading-relaxed">
+            <span className="font-bold text-clay-900">Como funciona:</span> escolha uma forma abaixo → ajuste as medidas → clique em "Preparar Impressão" e confira o quadrado de 1cm antes de cortar, pra garantir que o molde saiu no tamanho certo.
+          </p>
+          <button
+            onClick={dismissOnboarding}
+            aria-label="Dispensar dica de início rápido"
+            className="absolute top-3 right-3 p-1 rounded-lg text-clay-900/30 hover:text-clay-900/60 hover:bg-white/60 transition"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* SHAPE SELECTOR */}
       <div>
         <h4 className="text-xs font-bold text-clay-900/40 uppercase tracking-widest mb-3">Escolha o Molde Base</h4>
@@ -1707,12 +1744,27 @@ const SliderInput = ({
   label: string, tip: string, value: number, min: number, max: number, step: number, unit?: string, onChange: (val: number) => void 
 }) => {
   const [inputText, setInputText] = React.useState(value.toString());
+  const [clampMsg, setClampMsg] = React.useState<string | null>(null);
+  const clampTimeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   React.useEffect(() => {
     if (parseFloat(inputText) !== value) {
       setInputText(value.toString());
     }
   }, [value]);
+
+  React.useEffect(() => {
+    return () => {
+      if (clampTimeout.current) clearTimeout(clampTimeout.current);
+    };
+  }, []);
+
+  const flagClamp = (num: number) => {
+    if (num >= min && num <= max) return;
+    setClampMsg(num < min ? `Mínimo: ${min} ${unit}` : `Máximo: ${max} ${unit}`);
+    if (clampTimeout.current) clearTimeout(clampTimeout.current);
+    clampTimeout.current = setTimeout(() => setClampMsg(null), 2500);
+  };
 
   return (
     <div className="space-y-1.5 p-3.5 bg-white/60 border border-terracotta-100/40 rounded-xl shadow-xs transition-all hover:bg-white/85 hover:border-terracotta-200">
@@ -1751,6 +1803,7 @@ const SliderInput = ({
             setInputText(val);
             const num = parseFloat(val);
             if (!isNaN(num)) {
+              flagClamp(num);
               onChange(Math.max(min, Math.min(max, num)));
             }
           }}
@@ -1762,18 +1815,46 @@ const SliderInput = ({
           className="w-14 bg-clay-50/40 border border-terracotta-100/50 rounded-lg py-0.5 px-1 text-center text-[10px] font-mono font-semibold text-clay-800 focus:outline-none focus:border-terracotta-400 focus:bg-white"
         />
       </div>
-      <div className="flex justify-between text-[8px] text-clay-900/30 font-mono select-none">
-        <span>{min} {unit}</span>
-        <span>{max} {unit}</span>
-      </div>
+      {clampMsg ? (
+        <div className="text-[9px] text-terracotta-600 font-mono font-semibold">{clampMsg} — valor ajustado</div>
+      ) : (
+        <div className="flex justify-between text-[8px] text-clay-900/30 font-mono select-none">
+          <span>{min} {unit}</span>
+          <span>{max} {unit}</span>
+        </div>
+      )}
     </div>
   );
 };
 
 // Estimated liquid capacity for hollow revolution pieces (mugs, cups, vases).
+// A wall thicker than the piece's own radius (or any other extreme combo of
+// sliders) can legitimately drive this to zero/negative — that's not a small
+// result, it means the shape as configured has no hollow interior left, so
+// it gets its own warning treatment instead of the normal "success" card.
 const CapacityCard = ({ brimFullMl, practicalMl }: { brimFullMl: number; practicalMl: number }) => {
   const practicalOz = mlToOz(practicalMl);
   const brimOz = mlToOz(brimFullMl);
+  const isImpossible = brimFullMl <= 0;
+
+  if (isImpossible) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 shadow-sm flex items-center gap-3.5">
+        <div className="w-9 h-9 shrink-0 bg-red-100 rounded-xl flex items-center justify-center">
+          <AlertTriangle className="w-4.5 h-4.5" />
+        </div>
+        <div className="flex-1">
+          <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-red-500">Capacidade Impossível</span>
+          <div className="text-sm font-bold leading-tight mt-0.5">
+            Essa peça não tem espaço interno
+          </div>
+          <span className="text-[10px] text-red-600/80 font-sans">
+            A espessura da parede está maior que o próprio raio da peça — reduza a espessura ou aumente o diâmetro.
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-teal-600 rounded-2xl p-4 text-white shadow-sm flex items-center gap-3.5">

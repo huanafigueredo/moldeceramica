@@ -368,9 +368,9 @@ export default function Dashboard() {
                     <div className="p-3 bg-emerald-50 rounded-xl text-emerald-500 w-fit mb-6">
                       <Calculator className="w-5 h-5" />
                     </div>
-                    <h3 className="font-serif text-lg font-bold text-clay-900 mb-2">Assistente</h3>
+                    <h3 className="font-serif text-lg font-bold text-clay-900 mb-2">Calculadoras</h3>
                     <p className="text-[11px] text-clay-900/50 leading-relaxed">
-                      Calibre a taxa de retração real da sua argila.
+                      Calibre a retração da sua argila e gere moldes de placas e discos.
                     </p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-emerald-500 group-hover:translate-x-1 transition-transform" />
@@ -403,26 +403,30 @@ export default function Dashboard() {
           {/* TAB 1: PARAMETRIC MOLDS AND VISUAL PREVIEW */}
           {visitedTabs.generator && (
             <div className={activeTab === 'generator' ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 items-start' : 'hidden'}>
-              {/* Scaled preview rendering canvas - 7 cols. Shown first (order-1) so
-                  the live result is visible immediately on narrow screens, where the
-                  grid stacks to a single column; back to the right on desktop (lg:order-2). */}
-              <div className="order-1 lg:order-2 lg:col-span-7 h-full">
-                <MoldVisualizer
-                  shapeType={shapeType}
-                  params={getActiveParams()}
-                  onChangeParams={handleUpdateParams}
-                  onPrintRequest={(svg, bbox) => setPrintRequest({ svgString: svg, boundingBox: bbox })}
-                />
-              </div>
-
-              {/* Parameter Editor inputs - 5 cols */}
-              <div className="order-2 lg:order-1 lg:col-span-5 h-full">
+              {/* Parameter Editor inputs - 5 cols. Shown first (order-1) on narrow
+                  screens, where the grid stacks to a single column, so the shape
+                  picker and controls come before the print/export buttons that
+                  live at the bottom of the preview panel — configure, then see
+                  the result, then export, in that order. Back to the left on
+                  desktop (lg:order-1), where both panels are visible side by side
+                  anyway so the ordering only matters for the stacked mobile view. */}
+              <div className="order-1 lg:order-1 lg:col-span-5 h-full">
                 <ParametricMolds
                   shapeType={shapeType}
                   setShapeType={setShapeType}
                   globalShrinkage={globalShrinkage}
                   params={getActiveParams()}
                   onChangeParams={handleUpdateParams}
+                />
+              </div>
+
+              {/* Scaled preview rendering canvas - 7 cols. */}
+              <div className="order-2 lg:order-2 lg:col-span-7 h-full">
+                <MoldVisualizer
+                  shapeType={shapeType}
+                  params={getActiveParams()}
+                  onChangeParams={handleUpdateParams}
+                  onPrintRequest={(svg, bbox) => setPrintRequest({ svgString: svg, boundingBox: bbox })}
                 />
               </div>
             </div>

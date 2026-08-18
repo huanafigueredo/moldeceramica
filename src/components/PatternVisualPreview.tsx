@@ -658,6 +658,8 @@ export default function PatternVisualPreview({
                       showGrid ? 'bg-terracotta-50 text-terracotta-600' : 'text-stone-400 hover:bg-stone-50'
                     }`}
                     title="Mostrar Grade"
+                    aria-label="Alternar exibição da grade"
+                    aria-pressed={showGrid}
                   >
                     Grid
                   </button>
@@ -919,7 +921,7 @@ export default function PatternVisualPreview({
               </div>
 
               <div className="flex items-center justify-between pt-1 border-t border-stone-200/50">
-                <span className="font-bold text-[#2c4cdb]">Molde Cru Recomendado (wetSize)</span>
+                <span className="font-bold text-[#2c4cdb]">Molde Cru Recomendado</span>
                 <div className="w-6 h-0.5 bg-[#2c4cdb]" />
               </div>
             </div>

@@ -254,6 +254,7 @@ function SavedMoldsModeration() {
                 onClick={() => handleDelete(row.id)}
                 className="shrink-0 p-2 rounded-lg bg-white hover:bg-red-50 border border-red-100/60 text-red-400 hover:text-red-600 transition"
                 title="Apagar"
+                aria-label={`Apagar molde ${row.name}`}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -338,6 +339,8 @@ function SuggestionsInbox() {
                     onClick={() => toggleRead(row)}
                     className="p-1.5 rounded-lg hover:bg-white text-clay-900/40 hover:text-emerald-600 transition"
                     title={row.is_read ? 'Marcar como não lida' : 'Marcar como lida'}
+                    aria-label={row.is_read ? 'Marcar sugestão como não lida' : 'Marcar sugestão como lida'}
+                    aria-pressed={row.is_read}
                   >
                     {row.is_read ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Circle className="w-4 h-4" />}
                   </button>
@@ -345,6 +348,7 @@ function SuggestionsInbox() {
                     onClick={() => handleDelete(row.id)}
                     className="p-1.5 rounded-lg hover:bg-white text-clay-900/40 hover:text-red-600 transition"
                     title="Apagar"
+                    aria-label="Apagar sugestão"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

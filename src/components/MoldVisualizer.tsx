@@ -383,6 +383,18 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
   const vbW = w_px + pad * 2;
   const vbH = h_px + pad * 2;
 
+  // A4 tiling estimate — same constants PrintTiledLayout uses (21x29.7cm
+  // page, 1cm margin on each side) — computed here too so the page count
+  // can be shown next to the size controls before the print modal even
+  // opens, instead of only surfacing "this needs 24 sheets" as a surprise
+  // after clicking "Preparar Impressão".
+  const printBBoxCm = { width: vbW / scale, height: vbH / scale };
+  const A4_USABLE_W = 19.0;
+  const A4_USABLE_H = 27.7;
+  const printPageCount =
+    Math.max(1, Math.ceil(printBBoxCm.width / A4_USABLE_W)) *
+    Math.max(1, Math.ceil(printBBoxCm.height / A4_USABLE_H));
+
   useEffect(() => {
     if (!dragState) return;
 
@@ -518,16 +530,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
     // in renderSVGElements. Using bboxW/H alone here used to leave both the
     // handle strip and the padding out of the physical size, so the browser
     // silently rescaled the whole page to fit, breaking true 1:1 printing.
-    const scale = pxPerCm;
-    const pad = 40;
-    const w_px = ((data as any).viewBboxW ?? data.bboxW) * scale;
-    const h_px = ((data as any).viewBboxH ?? data.bboxH) * scale;
-    const bbox = {
-      width: (w_px + pad * 2) / scale,
-      height: (h_px + pad * 2) / scale,
-    };
     const svgString = new XMLSerializer().serializeToString(svgRef.current);
-    onPrintRequest(svgString, bbox);
+    onPrintRequest(svgString, printBBoxCm);
   };
 
   // Generate SVG Path & Elements based on current shape
@@ -2119,6 +2123,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                       : 'bg-white border-gray-100 text-clay-900/30'
                   }`}
                   title="Alternar Margem de Costura"
+                  aria-label="Alternar exibição da margem de costura"
+                  aria-pressed={showSeam}
                 >
                   <Sliders className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Margens</span>
@@ -2131,6 +2137,8 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                       : 'bg-white border-gray-100 text-clay-900/30'
                   }`}
                   title="Alternar Linhas de Cota"
+                  aria-label="Alternar exibição das linhas de cota"
+                  aria-pressed={showDimensions}
                 >
                   <Settings className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Cotas</span>
@@ -2155,22 +2163,30 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
           </div>
 
           {/* Export / Print Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-dashed border-clay-200">
-            <button
-              onClick={handleExportSVG}
-              className="py-4 px-6 bg-white hover:bg-clay-50 border border-terracotta-100 text-terracotta-600 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
-            >
-              <Download className="w-4 h-4" />
-              Exportar SVG
-            </button>
+          <div className="pt-6 border-t border-dashed border-clay-200 space-y-3">
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] text-clay-900/40 font-mono">
+              <Layers className="w-3 h-3" />
+              {printPageCount === 1
+                ? 'Cabe em 1 folha A4'
+                : `Mosaico: ${printPageCount} folhas A4 no tamanho atual`}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                onClick={handleExportSVG}
+                className="py-4 px-6 bg-white hover:bg-clay-50 border border-terracotta-100 text-terracotta-600 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
+              >
+                <Download className="w-4 h-4" />
+                Exportar SVG
+              </button>
 
-            <button
-              onClick={handlePrint}
-              className="py-4 px-6 bg-terracotta-500 hover:bg-terracotta-600 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
-            >
-              <Printer className="w-4.5 h-4.5" />
-              Preparar Impressão
-            </button>
+              <button
+                onClick={handlePrint}
+                className="py-4 px-6 bg-terracotta-500 hover:bg-terracotta-600 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
+              >
+                <Printer className="w-4.5 h-4.5" />
+                Preparar Impressão
+              </button>
+            </div>
           </div>
 
           {/* Hidden SVG wrapper to ensure exporting and printing works fine when using Canvas view */}
