@@ -34,6 +34,12 @@ interface SearchResult {
     thickness_napkin?: number;
     depth?: number;
     thickness?: number;
+    baseDiameter?: number;
+    shoulderDiameter?: number;
+    neckDiameter?: number;
+    shoulderPosition?: number;
+    curvature?: number;
+    baseRadius?: number;
   };
 }
 
@@ -114,9 +120,21 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
       normalizedShape = 'napkin_holder';
     } else if (sType.includes('box') || sType.includes('caixa') || sType.includes('prisma') || sType.includes('retangular') || sType.includes('bloco')) {
       normalizedShape = 'box';
+    } else if (sType.includes('bowl') || sType.includes('tigela')) {
+      normalizedShape = 'bowl';
+    } else if (sType.includes('vase') || sType.includes('jarra')) {
+      normalizedShape = 'vase';
+    } else if (sType.includes('organic_plate') || sType.includes('organico') || sType.includes('orgânico')) {
+      normalizedShape = 'organic_plate';
     } else {
       // Default fallback based on fields present in the response
-      if (item.dimensions?.topDiameter || item.dimensions?.bottomDiameter) {
+      if (item.dimensions?.shoulderDiameter || item.dimensions?.neckDiameter) {
+        normalizedShape = 'vase';
+      } else if (item.dimensions?.curvature !== undefined && item.dimensions?.topDiameter) {
+        normalizedShape = 'bowl';
+      } else if (item.dimensions?.baseRadius) {
+        normalizedShape = 'organic_plate';
+      } else if (item.dimensions?.topDiameter || item.dimensions?.bottomDiameter) {
         normalizedShape = 'cone';
       } else if (item.dimensions?.length || item.dimensions?.width) {
         normalizedShape = 'tray';
@@ -176,6 +194,36 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
         seamAllowance: 1.0,
         hasLid: false,
       };
+    } else if (normalizedShape === 'bowl') {
+      mappedParams = {
+        topDiameter: parseDim(item.dimensions?.topDiameter, 18),
+        bottomDiameter: parseDim(item.dimensions?.bottomDiameter, 8),
+        height: parseDim(item.dimensions?.height || item.dimensions?.desiredHeight, 9),
+        curvature: parseDim(item.dimensions?.curvature, 60),
+        shrinkage: globalShrinkage,
+        seamAllowance: 1.5,
+      };
+    } else if (normalizedShape === 'vase') {
+      mappedParams = {
+        baseDiameter: parseDim(item.dimensions?.baseDiameter, 9),
+        shoulderDiameter: parseDim(item.dimensions?.shoulderDiameter, 16),
+        neckDiameter: parseDim(item.dimensions?.neckDiameter, 6),
+        height: parseDim(item.dimensions?.height || item.dimensions?.desiredHeight, 22),
+        shoulderPosition: parseDim(item.dimensions?.shoulderPosition, 60),
+        curvature: parseDim(item.dimensions?.curvature, 60),
+        shrinkage: globalShrinkage,
+        seamAllowance: 1.5,
+      };
+    } else if (normalizedShape === 'organic_plate') {
+      mappedParams = {
+        baseRadius: parseDim(item.dimensions?.baseRadius, 11),
+        irregularity: 40,
+        seed: 1,
+        hasLip: true,
+        lipHeight: 3,
+        lipAngle: 40,
+        shrinkage: globalShrinkage,
+      };
     }
 
     onSelectModel(normalizedShape, mappedParams);
@@ -188,6 +236,10 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
       case 'tray': return 'Prato/Travessa';
       case 'napkin_holder': return 'Porta-Guardanapo';
       case 'box': return 'Caixa / Prismas';
+      case 'bowl': return 'Tigela / Bowl';
+      case 'vase': return 'Jarra / Vaso';
+      case 'organic_plate': return 'Prato Orgânico';
+      default: return 'Molde';
     }
   };
 
@@ -203,6 +255,12 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
       return `Largura: ${(d.width_napkin || d.width)?.toFixed(1) || '12'} cm | Altura: ${(d.height_napkin || d.height)?.toFixed(1) || '8'} cm | Profundidade: ${(d.depth_napkin || d.depth)?.toFixed(1) || '5'} cm (Espessura recomendada: ${(d.thickness_napkin || d.thickness || 0.8).toFixed(1)} cm)`;
     } else if (item.shapeType === 'box') {
       return `Largura: ${d.width?.toFixed(1) || '14'} cm | Altura: ${d.height?.toFixed(1) || '10'} cm | Profundidade: ${d.depth?.toFixed(1) || '8'} cm (Espessura: ${(d.thickness || 0.8).toFixed(1)} cm)`;
+    } else if (item.shapeType === 'bowl') {
+      return `Ø Borda: ${d.topDiameter?.toFixed(1) || '18'} cm | Ø Base: ${d.bottomDiameter?.toFixed(1) || '8'} cm | Altura: ${d.height?.toFixed(1) || '9'} cm (Curvatura: ${d.curvature ?? 60})`;
+    } else if (item.shapeType === 'vase') {
+      return `Ø Base: ${d.baseDiameter?.toFixed(1) || '9'} cm | Ø Ombro: ${d.shoulderDiameter?.toFixed(1) || '16'} cm | Ø Gargalo: ${d.neckDiameter?.toFixed(1) || '6'} cm | Altura: ${d.height?.toFixed(1) || '22'} cm`;
+    } else if (item.shapeType === 'organic_plate') {
+      return `Raio Base: ${d.baseRadius?.toFixed(1) || '11'} cm`;
     }
     return '';
   };

@@ -512,10 +512,19 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
 
   const handlePrint = () => {
     if (!svgRef.current) return;
-    // Bounding box in cm
+    // Physical size must match the SVG's actual viewBox exactly — it spans
+    // viewBboxW/H (wider than bboxW/H alone whenever a handle strip is
+    // attached below the body) plus the fixed padding added around it below
+    // in renderSVGElements. Using bboxW/H alone here used to leave both the
+    // handle strip and the padding out of the physical size, so the browser
+    // silently rescaled the whole page to fit, breaking true 1:1 printing.
+    const scale = pxPerCm;
+    const pad = 40;
+    const w_px = ((data as any).viewBboxW ?? data.bboxW) * scale;
+    const h_px = ((data as any).viewBboxH ?? data.bboxH) * scale;
     const bbox = {
-      width: data.bboxW,
-      height: data.bboxH,
+      width: (w_px + pad * 2) / scale,
+      height: (h_px + pad * 2) / scale,
     };
     const svgString = new XMLSerializer().serializeToString(svgRef.current);
     onPrintRequest(svgString, bbox);
@@ -693,14 +702,21 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                 {/* Draw some stylized holes to represent pattern */}
                 {(() => {
                   const p = params as CylinderParams;
-                  const holeRad = (p.holeDiameter / 2) * scale;
-                  const holeDist = p.holeSpacing * scale;
-                  const cols = Math.max(1, Math.floor((data.bboxW - p.seamAllowance - 2) / p.holeSpacing));
-                  const rows = Math.max(1, Math.floor((data.bboxH - 2) / p.holeSpacing));
+                  // holeDiameter/holeSpacing are the user's desired FINAL
+                  // (post-firing) sizes, like every other dimension here —
+                  // must convert to mold-scale before drawing, or the holes
+                  // print smaller than promised once the clay shrinks.
+                  const shrinkFactor = 1 - p.shrinkage / 100;
+                  const holeDiameter_mold = p.holeDiameter / shrinkFactor;
+                  const holeSpacing_mold = p.holeSpacing / shrinkFactor;
+                  const holeRad = (holeDiameter_mold / 2) * scale;
+                  const holeDist = holeSpacing_mold * scale;
+                  const cols = Math.max(1, Math.floor((data.bboxW - p.seamAllowance - 2) / holeSpacing_mold));
+                  const rows = Math.max(1, Math.floor((data.bboxH - 2) / holeSpacing_mold));
                   const elements = [];
 
-                  const xStart = (data.bboxW - p.seamAllowance - (cols - 1) * p.holeSpacing) * scale / 2;
-                  const yStart = (data.bboxH - (rows - 1) * p.holeSpacing) * scale / 2;
+                  const xStart = (data.bboxW - p.seamAllowance - (cols - 1) * holeSpacing_mold) * scale / 2;
+                  const yStart = (data.bboxH - (rows - 1) * holeSpacing_mold) * scale / 2;
                   const shape = p.holeShape || 'circle';
 
                   for (let r = 0; r < rows; r++) {
