@@ -73,6 +73,10 @@ const DIMENSION_FIELDS: Record<ShapeType, { key: string; label: string }[]> = {
     { key: 'shoulderPosition', label: 'Posição do Ombro (0-100)' },
     { key: 'curvature', label: 'Curvatura (0-100)' },
   ],
+  // Sketch molds are created from a hand-drawn profile, not typed numbers —
+  // excluded from the "Nova Referência" dropdown below, kept here only so
+  // the Record<ShapeType, ...> stays exhaustive.
+  sketch: [],
 };
 
 const SHAPE_LABELS: Record<ShapeType, string> = {
@@ -84,6 +88,7 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
   organic_plate: 'Prato Orgânico',
   bowl: 'Tigela/Bowl',
   vase: 'Jarra/Vaso',
+  sketch: 'Molde Desenhado',
 };
 
 const VALID_TABS: AdminTab[] = ['moldes', 'sugestoes', 'nova-referencia'];
@@ -353,7 +358,7 @@ function NewLibraryEntryForm() {
             onChange={(e) => handleShapeChange(e.target.value as ShapeType)}
             className="w-full bg-clay-50 border border-terracotta-100 rounded-2xl px-4 py-3 text-clay-900 text-sm focus:outline-none focus:border-terracotta-500"
           >
-            {(Object.keys(SHAPE_LABELS) as ShapeType[]).map((s) => (
+            {(Object.keys(SHAPE_LABELS) as ShapeType[]).filter((s) => s !== 'sketch').map((s) => (
               <option key={s} value={s}>{SHAPE_LABELS[s]}</option>
             ))}
           </select>

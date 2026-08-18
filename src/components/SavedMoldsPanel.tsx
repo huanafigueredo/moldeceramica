@@ -27,6 +27,7 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
   organic_plate: 'Prato Orgânico',
   bowl: 'Tigela/Bowl',
   vase: 'Jarra/Vaso',
+  sketch: 'Molde Desenhado',
 };
 
 export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMoldsPanelProps) {

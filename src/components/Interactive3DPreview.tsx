@@ -1,14 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
 import { RotateCw, Sparkles, Package, Flame, Sliders, HelpCircle } from 'lucide-react';
 import { computeOrganicOutline, scalePoints } from '../utils/organicShape';
 import { bowlRadiusAt, BOWL_PREVIEW_RINGS } from '../utils/bowlShape';
 import { vaseRadiusAt, VASE_PREVIEW_RINGS } from '../utils/vaseShape';
-import { computeBowlCapacity, computeVaseCapacity } from '../utils/capacity';
+import { sketchRadiusAt, SKETCH_PREVIEW_RINGS } from '../utils/sketchShape';
+import { computeBowlCapacity, computeVaseCapacity, computeSketchCapacity } from '../utils/capacity';
 
 interface Interactive3DPreviewProps {
   shapeType: ShapeType;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams | SketchParams;
 }
 
 interface Point3D {
@@ -634,6 +635,51 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
         });
       }
     }
+    else if (shapeType === 'sketch') {
+      const p = params as SketchParams;
+      const maxR = (p.maxDiameter / 2) * sizeMultiplier;
+      const h = p.height * sizeMultiplier;
+      const segments = 24;
+      const rings = SKETCH_PREVIEW_RINGS;
+
+      if (p.profilePoints.length >= 2) {
+        for (let ring = 0; ring <= rings; ring++) {
+          const t = ring / rings;
+          const r = sketchRadiusAt(t, p.profilePoints) * maxR;
+          const y = -h / 2 + t * h;
+          for (let i = 0; i < segments; i++) {
+            const theta = (i * 2 * Math.PI) / segments;
+            vertices.push({ x: r * Math.cos(theta), y, z: r * Math.sin(theta) });
+          }
+        }
+
+        const centerBottomIdx = vertices.length;
+        vertices.push({ x: 0, y: -h / 2, z: 0 });
+
+        for (let ring = 0; ring < rings; ring++) {
+          const ringStart = ring * segments;
+          const nextRingStart = (ring + 1) * segments;
+          for (let i = 0; i < segments; i++) {
+            const next = (i + 1) % segments;
+            faces.push({
+              indices: [ringStart + i, ringStart + next, nextRingStart + next, nextRingStart + i],
+              color: baseColor,
+              outlineColor: edgeColor,
+            });
+          }
+        }
+
+        for (let i = 0; i < segments; i++) {
+          const next = (i + 1) % segments;
+          faces.push({
+            indices: [i, next, centerBottomIdx],
+            color: stateMode === 'wet' ? '#bb8e7a' : '#b74c27',
+            outlineColor: edgeColor,
+            isBase: true,
+          });
+        }
+      }
+    }
 
     // 2. Rotate Points and Project to 2D
     const rotatedVertices: Point3D[] = [];
@@ -876,6 +922,10 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
       const p = params as VaseParams;
       const estimate = computeVaseCapacity(p.baseDiameter, p.shoulderDiameter, p.neckDiameter, p.height, p.shoulderPosition, p.curvature, p.wallThickness ?? 0.6);
       return { volume: estimate.brimFullMl, label: 'Capacidade Estimada (Jarra)' };
+    } else if (shapeType === 'sketch') {
+      const p = params as SketchParams;
+      const estimate = computeSketchCapacity(p.profilePoints, p.height, p.maxDiameter, p.wallThickness ?? 0.6);
+      return { volume: estimate.brimFullMl, label: 'Capacidade Estimada (Molde Desenhado)' };
     } else {
       const p = params as NapkinHolderParams;
       // Volume inside the holder slot
@@ -1053,6 +1103,9 @@ export default function Interactive3DPreview({ shapeType, params }: Interactive3
                 } else if (shapeType === 'vase') {
                   const p = params as VaseParams;
                   return `Ø Base ${(p.baseDiameter * s).toFixed(1)} | Ø Ombro ${(p.shoulderDiameter * s).toFixed(1)} | Ø Gargalo ${(p.neckDiameter * s).toFixed(1)} x H ${(p.height * s).toFixed(1)} cm`;
+                } else if (shapeType === 'sketch') {
+                  const p = params as SketchParams;
+                  return `Ø Máx ${(p.maxDiameter * s).toFixed(1)} x H ${(p.height * s).toFixed(1)} cm`;
                 } else {
                   const p = params as NapkinHolderParams;
                   return `W ${(p.width * s).toFixed(1)} x H ${(p.height * s).toFixed(1)} x D ${(p.depth * s).toFixed(1)} cm`;

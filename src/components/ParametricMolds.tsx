@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
-import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora } from 'lucide-react';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
+import { Compass, Coffee, Disc, Star, HelpCircle, CheckCircle, Package, ChevronRight, Leaf, Shuffle, Wand2, RotateCcw, Droplet, PlusCircle, Soup, Amphora, Pencil } from 'lucide-react';
 import { computeOrganicOutline, generateOrganicControlPoints } from '../utils/organicShape';
 import OrganicPointEditor from './OrganicPointEditor';
-import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, computeVaseCapacity, mlToOz } from '../utils/capacity';
+import { computeCylinderCapacity, computeConeCapacity, computeBowlCapacity, computeVaseCapacity, computeSketchCapacity, mlToOz } from '../utils/capacity';
 import SavedMoldsPanel from './SavedMoldsPanel';
 import { useAdminSession } from '../lib/adminAuth';
 
@@ -12,7 +12,7 @@ interface ParametricMoldsProps {
   shapeType: ShapeType;
   setShapeType: (type: ShapeType) => void;
   globalShrinkage: number;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams | SketchParams;
   onChangeParams: (newParams: any) => void;
 }
 
@@ -212,6 +212,24 @@ export default function ParametricMolds({
               </div>
             </div>
           </button>
+
+          {/* Sketch-to-mold shortcut */}
+          <Link
+            to="/desenhar"
+            className={`p-3.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+              shapeType === 'sketch'
+                ? 'bg-terracotta-500 text-white border-terracotta-600 shadow-md shadow-terracotta-500/10'
+                : 'bg-white/60 hover:bg-white border-dashed border-terracotta-200 hover:border-terracotta-300 text-clay-900'
+            }`}
+          >
+            <Pencil className={`w-5 h-5 ${shapeType === 'sketch' ? 'text-white' : 'text-terracotta-500'}`} />
+            <div>
+              <div className="text-xs font-bold font-sans">Desenhar Minha Forma</div>
+              <div className={`text-[10px] ${shapeType === 'sketch' ? 'text-terracotta-100' : 'text-clay-900/50'}`}>
+                Esboce o contorno e a gente endireita
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
 
@@ -297,6 +315,11 @@ export default function ParametricMolds({
             h = p.height || 22;
             w = Math.max(p.shoulderDiameter || 16, p.baseDiameter || 9, p.neckDiameter || 6);
             label = `Jarra/Vaso (${w.toFixed(1)} x ${h.toFixed(1)} cm)`;
+          } else if (shapeType === 'sketch') {
+            const p = params as SketchParams;
+            h = p.height || 12;
+            w = p.maxDiameter || 10;
+            label = `Molde Desenhado (${w.toFixed(1)} x ${h.toFixed(1)} cm)`;
           }
 
           return { h: Math.max(0.5, h), w: Math.max(0.5, w), label };
@@ -1523,6 +1546,94 @@ export default function ParametricMolds({
           </div>
         )}
 
+        {shapeType === 'sketch' && (
+          <div className="space-y-6">
+            {(params as SketchParams).profilePoints.length < 2 ? (
+              <div className="p-5 bg-amber-50/50 border border-amber-100 rounded-2xl text-center space-y-3">
+                <p className="text-xs text-clay-900/70">Você ainda não desenhou uma forma.</p>
+                <Link
+                  to="/desenhar"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-terracotta-500 hover:bg-terracotta-600 text-white rounded-xl text-xs font-bold transition"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Ir para o Desenho
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-4 bg-terracotta-400 rounded-full" />
+                      <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Tamanho Real</h5>
+                    </div>
+                    <Link to="/desenhar" className="text-[10px] font-bold text-terracotta-600 hover:text-terracotta-700 flex items-center gap-1">
+                      <Pencil className="w-3 h-3" />
+                      Redesenhar
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <SliderInput
+                      label="Altura Desejada"
+                      tip="Altura final da peça após a queima"
+                      value={(params as SketchParams).height}
+                      min={4}
+                      max={45}
+                      step={0.5}
+                      onChange={(val) => handleUpdate('height', val)}
+                    />
+                    <SliderInput
+                      label="Diâmetro Máximo"
+                      tip="Diâmetro no ponto mais largo do seu desenho"
+                      value={(params as SketchParams).maxDiameter}
+                      min={3}
+                      max={40}
+                      step={0.5}
+                      onChange={(val) => handleUpdate('maxDiameter', val)}
+                    />
+                  </div>
+                  <SliderInput
+                    label="Espessura da Parede"
+                    tip="Espessura da placa de argila; usada para estimar a capacidade interna"
+                    value={(params as SketchParams).wallThickness ?? 0.6}
+                    min={0.3}
+                    max={2.0}
+                    step={0.1}
+                    onChange={(val) => handleUpdate('wallThickness', val)}
+                  />
+                  <CapacityCard
+                    {...computeSketchCapacity(
+                      (params as SketchParams).profilePoints,
+                      (params as SketchParams).height,
+                      (params as SketchParams).maxDiameter,
+                      (params as SketchParams).wallThickness ?? 0.6
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-1 h-4 bg-amber-400 rounded-full" />
+                    <h5 className="text-[11px] font-bold text-clay-900/60 uppercase">Montagem</h5>
+                  </div>
+                  <SliderInput
+                    label="Margem de Costura"
+                    tip="Largura extra para colagem entre as bandas empilhadas"
+                    value={(params as SketchParams).seamAllowance}
+                    min={0.2}
+                    max={4.0}
+                    step={0.1}
+                    onChange={(val) => handleUpdate('seamAllowance', val)}
+                  />
+                  <p className="text-[10px] text-clay-900/40 font-sans leading-relaxed">
+                    O molde é impresso em {(params as SketchParams).profilePoints.length - 1} bandas — uma pra cada segmento reto do seu desenho, da base até a borda.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* CLAY shrinkage linkage indicator */}
         <div className="mt-5 pt-4 border-t border-dashed border-terracotta-100/60 flex items-center justify-between text-xs font-sans">
           <div className="flex items-center gap-2 text-clay-900/60">
@@ -1577,6 +1688,11 @@ export default function ParametricMolds({
         {shapeType === 'vase' && (
           <p className="text-clay-900/70 leading-relaxed">
             No ombro (o ponto mais largo), a argila tende a rachar se puxada rápido demais — trabalhe essa banda com calma, batendo levemente com a colher de borracha para compactar antes de seguir para o gargalo, que já é mais fino e fecha mais rápido.
+          </p>
+        )}
+        {shapeType === 'sketch' && (
+          <p className="text-clay-900/70 leading-relaxed">
+            Como cada banda vem de um trecho do seu desenho, elas podem ter proporções bem diferentes entre si — confira o ângulo de cada uma antes de cortar, e monte sempre da base até a borda pra manter a curva fiel ao que você imaginou.
           </p>
         )}
       </div>

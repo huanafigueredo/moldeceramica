@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
 import RetractionCalculator from './RetractionCalculator';
 import ParametricMolds from './ParametricMolds';
 import MoldVisualizer from './MoldVisualizer';
 import PrintTiledLayout from './PrintTiledLayout';
 import AITemplateFinder from './AITemplateFinder';
+import SketchMoldPage from './SketchMoldPage';
 import AppHeader from './AppHeader';
 import { Flame, Layers, Calculator, Info, Compass, ArrowRight } from 'lucide-react';
 
-const PATH_TO_TAB: Record<string, 'overview' | 'generator' | 'search' | 'calculator'> = {
+const PATH_TO_TAB: Record<string, 'overview' | 'generator' | 'search' | 'calculator' | 'sketch'> = {
   '/': 'overview',
   '/moldes': 'generator',
   '/biblioteca': 'search',
   '/calculadoras': 'calculator',
+  '/desenhar': 'sketch',
 };
 const TAB_TO_PATH: Record<string, string> = {
   overview: '/',
   generator: '/moldes',
   search: '/biblioteca',
   calculator: '/calculadoras',
+  sketch: '/desenhar',
 };
 
 export default function Dashboard() {
@@ -124,6 +127,15 @@ export default function Dashboard() {
     wallThickness: 0.6,
   });
 
+  const [sketchParams, setSketchParams] = useState<SketchParams>({
+    profilePoints: [],
+    height: 12,
+    maxDiameter: 10,
+    shrinkage: 12.0,
+    seamAllowance: 1.0,
+    wallThickness: 0.6,
+  });
+
   // Printing mosaic modal states
   const [printRequest, setPrintRequest] = useState<{
     svgString: string;
@@ -141,6 +153,7 @@ export default function Dashboard() {
     setOrganicPlateParams((p) => ({ ...p, shrinkage: newShrinkage }));
     setBowlParams((p) => ({ ...p, shrinkage: newShrinkage }));
     setVaseParams((p) => ({ ...p, shrinkage: newShrinkage }));
+    setSketchParams((p) => ({ ...p, shrinkage: newShrinkage }));
   };
 
   const getActiveParams = () => {
@@ -161,6 +174,8 @@ export default function Dashboard() {
         return bowlParams;
       case 'vase':
         return vaseParams;
+      case 'sketch':
+        return sketchParams;
     }
   };
 
@@ -195,7 +210,18 @@ export default function Dashboard() {
       case 'vase':
         setVaseParams(newParams);
         break;
+      case 'sketch':
+        setSketchParams(newParams);
+        break;
     }
+  };
+
+  // Called when a hand-drawn profile from /desenhar is ready for configuration
+  const handleSketchComplete = (profilePoints: { t: number; r: number }[]) => {
+    setShapeType('sketch');
+    setSketchParams((p) => ({ ...p, profilePoints, shrinkage: globalShrinkage }));
+    goToTab('generator');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Called when an AI searched template is selected
@@ -394,6 +420,13 @@ export default function Dashboard() {
                 onSelectModel={handleSelectModel}
                 globalShrinkage={globalShrinkage}
               />
+            </div>
+          )}
+
+          {/* TAB 5: SKETCH-TO-MOLD */}
+          {visitedTabs.sketch && (
+            <div className={activeTab === 'sketch' ? '' : 'hidden'}>
+              <SketchMoldPage onComplete={handleSketchComplete} />
             </div>
           )}
 

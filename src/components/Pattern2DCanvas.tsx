@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
 import { Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 interface Pattern2DCanvasProps {
   shapeType: ShapeType;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams | SketchParams;
   data: any;
   showSeam: boolean;
   showDimensions: boolean;
@@ -108,6 +108,8 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       drawBowl(ctx, scale, data, showSeam, showDimensions);
     } else if (shapeType === 'vase') {
       drawVase(ctx, scale, data, showSeam, showDimensions);
+    } else if (shapeType === 'sketch') {
+      drawSketchShape(ctx, scale, data, showSeam, showDimensions);
     }
 
     ctx.restore();
@@ -959,6 +961,110 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         centerX,
         d.bboxH * scale + 26
       );
+    }
+
+    ctx.restore();
+  };
+
+  // Hand-drawn profile pattern — same banded-frustum technique, driven by
+  // the user's straightened sketch instead of a formula.
+  const drawSketchShape = (
+    ctx: CanvasRenderingContext2D,
+    scale: number,
+    d: any,
+    showSeam: boolean,
+    showDimensions: boolean
+  ) => {
+    ctx.save();
+    const BAND_GAP = 1.5 * scale;
+    let yCursor = 0;
+    const centerX = (d.bboxW * scale) / 2;
+
+    (d.bands as any[]).forEach((band, i) => {
+      const bandOriginY = yCursor;
+      yCursor += band.bboxH * scale + BAND_GAP;
+
+      if (band.isCylindrical) {
+        const bandW = band.bboxW * scale;
+        const bandH = band.bboxH * scale;
+        const x0 = centerX - bandW / 2;
+        ctx.strokeStyle = '#2c4cdb';
+        ctx.lineWidth = 2;
+        ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
+        ctx.beginPath();
+        ctx.rect(x0, bandOriginY, bandW, bandH);
+        ctx.fill();
+        ctx.stroke();
+        if (showDimensions) {
+          ctx.fillStyle = '#374151';
+          ctx.font = 'bold 9px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Banda ${i + 1}/${d.bands.length} — Ø ${(band.rBottom * 2).toFixed(1)} cm`, centerX, bandOriginY + bandH / 2);
+        }
+        return;
+      }
+
+      const L_outer_px = band.L_outer * scale;
+      const L_inner_px = band.L_inner * scale;
+      const apexX = centerX;
+      const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+
+      const getPoint = (r: number, angleRad: number) => {
+        const a = Math.PI / 2 + angleRad;
+        return { x: apexX + r * Math.cos(a), y: apexY + r * Math.sin(a) };
+      };
+
+      const pt1_out = getPoint(L_outer_px, -band.total_theta / 2);
+      const pt3_in = getPoint(L_inner_px, band.total_theta / 2);
+      const pt_circ_end = getPoint(L_outer_px, -band.total_theta / 2 + band.theta);
+      const pt_circ_end_in = getPoint(L_inner_px, -band.total_theta / 2 + band.theta);
+
+      ctx.strokeStyle = '#2c4cdb';
+      ctx.lineWidth = 2;
+      ctx.fillStyle = 'rgba(90, 114, 228, 0.04)';
+      ctx.beginPath();
+      ctx.moveTo(pt1_out.x, pt1_out.y);
+      ctx.arc(apexX, apexY, L_outer_px, Math.PI / 2 - band.total_theta / 2, Math.PI / 2 + band.total_theta / 2, false);
+      ctx.lineTo(pt3_in.x, pt3_in.y);
+      ctx.arc(apexX, apexY, L_inner_px, Math.PI / 2 + band.total_theta / 2, Math.PI / 2 - band.total_theta / 2, true);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      if (showSeam && d.seam > 0) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(44, 76, 219, 0.08)';
+        ctx.strokeStyle = '#2c4cdb';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(pt_circ_end.x, pt_circ_end.y);
+        ctx.arc(apexX, apexY, L_outer_px, Math.PI / 2 - band.total_theta / 2 + band.theta, Math.PI / 2 + band.total_theta / 2, false);
+        ctx.lineTo(pt3_in.x, pt3_in.y);
+        ctx.arc(apexX, apexY, L_inner_px, Math.PI / 2 + band.total_theta / 2, Math.PI / 2 - band.total_theta / 2 + band.theta, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (showDimensions) {
+        ctx.fillStyle = '#374151';
+        ctx.font = 'bold 9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          `Banda ${i + 1}/${d.bands.length} • Ø ${(band.rBottom * 2).toFixed(1)}→${(band.rTop * 2).toFixed(1)} cm • Geratriz ${band.s.toFixed(1)} cm`,
+          apexX,
+          bandOriginY + band.bboxH * scale + 14
+        );
+      }
+    });
+
+    if (showDimensions) {
+      ctx.fillStyle = '#374151';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Molde Desenhado: Ø Máx ${d.d_max_mold.toFixed(1)} cm | Altura ${d.h_mold.toFixed(1)} cm`, centerX, d.bboxH * scale + 26);
     }
 
     ctx.restore();

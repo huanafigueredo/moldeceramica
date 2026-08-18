@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams } from '../types';
+import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
 import { Download, Printer, Layers, Sliders, Check, Settings, Scissors, Sparkles, HelpCircle } from 'lucide-react';
 import Interactive3DPreview from './Interactive3DPreview';
 import Pattern2DCanvas from './Pattern2DCanvas';
 import { computeOrganicOutline, pointsToPathD, scalePoints } from '../utils/organicShape';
 import { computeBowlBands, BOWL_BAND_GAP } from '../utils/bowlShape';
 import { computeVaseBands, VASE_BAND_GAP } from '../utils/vaseShape';
+import { computeSketchBands, SKETCH_BAND_GAP } from '../utils/sketchShape';
 
 // Shared handle-strip sizing for Cylinder/Cone mugs: derives the flat strip
 // piece's dimensions and how much extra bbox space it needs below the main
@@ -72,7 +73,7 @@ function HandleAttachGuidesSVG({ scale, data, wPx }: { scale: number; data: any;
 
 interface MoldVisualizerProps {
   shapeType: ShapeType;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams | SketchParams;
   onPrintRequest: (svgString: string, boundingBox: { width: number; height: number }) => void;
   onChangeParams?: (newParams: any) => void;
 }
@@ -329,6 +330,28 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
         seam,
         bboxW,
         bboxH,
+      };
+    } else if (shapeType === 'sketch') {
+      const p = params as SketchParams;
+      const h_mold = p.height / shrinkFactor;
+      const maxR_mold = p.maxDiameter / 2 / shrinkFactor;
+      const seam = showSeam ? p.seamAllowance : 0;
+
+      const bands = computeSketchBands(p.profilePoints, h_mold, maxR_mold, seam);
+      const bboxW = bands.length > 0 ? Math.max(...bands.map((b) => b.bboxW)) : 10;
+      const bboxH = bands.length > 0
+        ? bands.reduce((sum, b) => sum + b.bboxH, 0) + SKETCH_BAND_GAP * (bands.length - 1)
+        : 10;
+
+      return {
+        type: 'sketch',
+        bands,
+        h_mold,
+        maxR_mold,
+        d_max_mold: maxR_mold * 2,
+        seam,
+        bboxW: Math.max(bboxW, 10),
+        bboxH: Math.max(bboxH, 10),
       };
     } else {
       // organic_plate
@@ -1293,6 +1316,95 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
             {showDimensions && (
               <text x={(data.bboxW * scale) / 2} y={data.bboxH * scale + 26} className={textStyle} textAnchor="middle">
                 Jarra: Ø Base {(data as any).d_base_mold.toFixed(1)} cm | Ø Ombro {(data as any).d_shoulder_mold.toFixed(1)} cm | Ø Gargalo {(data as any).d_neck_mold.toFixed(1)} cm — corte e cole as {(data as any).bands.length} bandas em sequência
+              </text>
+            )}
+          </g>
+        )}
+
+        {shapeType === 'sketch' && (
+          <g transform={`translate(${pad}, ${pad})`}>
+            {(() => {
+              const sketchData = data as any;
+              const bands = sketchData.bands as import('../utils/bowlShape').BandGeometry[];
+              let yCursor = 0;
+              return bands.map((band, i) => {
+                const bandOriginY = yCursor;
+                yCursor += (band.bboxH + 1.5) * scale; // SKETCH_BAND_GAP in px
+
+                if (band.isCylindrical) {
+                  const bandW = band.bboxW * scale;
+                  const bandH = band.bboxH * scale;
+                  const x0 = (sketchData.bboxW * scale - bandW) / 2;
+                  return (
+                    <g key={i} transform={`translate(${x0}, ${bandOriginY})`}>
+                      <rect x="0" y="0" width={bandW} height={bandH} className={lineStyle} />
+                      {showSeam && sketchData.seam > 0 && (
+                        <rect x={bandW - sketchData.seam * scale} y="0" width={sketchData.seam * scale} height={bandH} fill="#2c4cdb" fillOpacity="0.08" className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]" />
+                      )}
+                      {showDimensions && (
+                        <text x={bandW / 2} y={bandH / 2} className={textStyle} textAnchor="middle">
+                          Banda {i + 1}/{bands.length} — Ø {(band.rBottom * 2).toFixed(1)} cm
+                        </text>
+                      )}
+                    </g>
+                  );
+                }
+
+                const L_outer_px = band.L_outer * scale;
+                const L_inner_px = band.L_inner * scale;
+                const apexX = sketchData.bboxW * scale / 2;
+                const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+
+                const getArcPoint = (r: number, angleRad: number) => {
+                  const a = Math.PI / 2 + angleRad;
+                  return { x: apexX + r * Math.cos(a), y: apexY + r * Math.sin(a) };
+                };
+
+                const pt1_out = getArcPoint(L_outer_px, -band.total_theta / 2);
+                const pt2_out = getArcPoint(L_outer_px, band.total_theta / 2);
+                const pt3_in = getArcPoint(L_inner_px, band.total_theta / 2);
+                const pt4_in = getArcPoint(L_inner_px, -band.total_theta / 2);
+                const pt_circ_end = getArcPoint(L_outer_px, -band.total_theta / 2 + band.theta);
+                const pt_circ_end_in = getArcPoint(L_inner_px, -band.total_theta / 2 + band.theta);
+
+                const mainPath = `
+                  M ${pt1_out.x} ${pt1_out.y}
+                  A ${L_outer_px} ${L_outer_px} 0 ${band.total_theta > Math.PI ? 1 : 0} 1 ${pt2_out.x} ${pt2_out.y}
+                  L ${pt3_in.x} ${pt3_in.y}
+                  A ${L_inner_px} ${L_inner_px} 0 ${band.total_theta > Math.PI ? 1 : 0} 0 ${pt4_in.x} ${pt4_in.y}
+                  Z
+                `;
+
+                return (
+                  <g key={i}>
+                    <path d={mainPath} className={lineStyle} />
+
+                    {showSeam && sketchData.seam > 0 && (
+                      <path
+                        d={`M ${pt_circ_end.x} ${pt_circ_end.y} A ${L_outer_px} ${L_outer_px} 0 0 1 ${pt2_out.x} ${pt2_out.y} L ${pt3_in.x} ${pt3_in.y} A ${L_inner_px} ${L_inner_px} 0 0 0 ${pt_circ_end_in.x} ${pt_circ_end_in.y} Z`}
+                        fill="#2c4cdb"
+                        fillOpacity="0.08"
+                        className="stroke-[#2c4cdb] stroke-[1] stroke-dasharray-[2,2]"
+                      />
+                    )}
+
+                    {showDimensions && (
+                      <text
+                        x={apexX}
+                        y={bandOriginY + band.bboxH * scale + 14}
+                        className={`${textStyle} text-[9px]`}
+                        textAnchor="middle"
+                      >
+                        Banda {i + 1}/{bands.length} • Ø {(band.rBottom * 2).toFixed(1)}→{(band.rTop * 2).toFixed(1)} cm • Geratriz {band.s.toFixed(1)} cm
+                      </text>
+                    )}
+                  </g>
+                );
+              });
+            })()}
+            {showDimensions && (
+              <text x={(data.bboxW * scale) / 2} y={data.bboxH * scale + 26} className={textStyle} textAnchor="middle">
+                Molde Desenhado: Ø Máx {(data as any).d_max_mold.toFixed(1)} cm | Altura {(data as any).h_mold.toFixed(1)} cm — corte e cole as {(data as any).bands.length} bandas em sequência
               </text>
             )}
           </g>

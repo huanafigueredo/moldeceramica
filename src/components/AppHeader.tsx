@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Flame, Grid, Layers, Compass, Calculator, Lightbulb } from 'lucide-react';
+import { Flame, Grid, Layers, Compass, Calculator, Lightbulb, Pencil } from 'lucide-react';
 
 interface AppHeaderProps {
   globalShrinkage?: number;
@@ -9,6 +9,7 @@ interface AppHeaderProps {
 const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', icon: Grid },
   { path: '/moldes', label: 'Moldes', icon: Layers },
+  { path: '/desenhar', label: 'Desenhar', icon: Pencil },
   { path: '/biblioteca', label: 'Biblioteca', icon: Compass },
   { path: '/calculadoras', label: 'Calculadoras', icon: Calculator },
   { path: '/sugestoes', label: 'Sugestões', icon: Lightbulb },

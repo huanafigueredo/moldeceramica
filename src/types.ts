@@ -1,4 +1,4 @@
-export type ShapeType = 'cylinder' | 'cone' | 'tray' | 'napkin_holder' | 'box' | 'organic_plate' | 'bowl' | 'vase';
+export type ShapeType = 'cylinder' | 'cone' | 'tray' | 'napkin_holder' | 'box' | 'organic_plate' | 'bowl' | 'vase' | 'sketch';
 
 export interface CylinderParams {
   desiredHeight: number; // in cm
@@ -90,10 +90,19 @@ export interface VaseParams {
   wallThickness?: number; // clay wall thickness (cm), used for the liquid capacity estimate
 }
 
+export interface SketchParams {
+  profilePoints: { t: number; r: number }[]; // normalized side-profile, from a freehand sketch
+  height: number; // desired real height (cm) — scales the normalized profile
+  maxDiameter: number; // desired real diameter at the profile's widest point (cm)
+  shrinkage: number; // C%
+  seamAllowance: number; // overlap per printed band (cm)
+  wallThickness?: number; // clay wall thickness (cm), used for the liquid capacity estimate
+}
+
 export interface SavedMold {
   id: string;
   name: string;
   shapeType: ShapeType;
-  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams;
+  params: CylinderParams | ConeParams | TrayParams | NapkinHolderParams | BoxParams | OrganicPlateParams | BowlParams | VaseParams | SketchParams;
   createdAt: string;
 }
