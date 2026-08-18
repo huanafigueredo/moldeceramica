@@ -97,6 +97,31 @@ export function sketchRadiusAt(t: number, points: ProfilePoint[]): number {
   return points[points.length - 1].r;
 }
 
+// Closed-loop variant of simplifyPath: forces the stroke shut (in case the
+// user's last point didn't quite meet the first) before straightening, then
+// drops the duplicate closing point — used for top-down outlines (trays,
+// organic plates) instead of side profiles.
+export function simplifyClosedPath(points: RawPoint[], epsilon: number): RawPoint[] {
+  if (points.length < 3) return points;
+  const closed = [...points, points[0]];
+  const simplified = simplifyPath(closed, epsilon);
+  return simplified.slice(0, -1);
+}
+
+// Converts a raw, simplified closed loop (canvas pixel coords) into
+// absolute-cm control points centered on the shape's own centroid — the
+// same format Prato Orgânico's manual point editor already produces, so a
+// sketched outline can go straight into `customPoints`.
+export function rawPointsToOutlineCm(points: RawPoint[], pxPerCm: number): { x: number; y: number }[] {
+  if (points.length < 3) return [];
+  const cx = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+  const cy = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+  return points.map((p) => ({
+    x: (p.x - cx) / pxPerCm,
+    y: (p.y - cy) / pxPerCm,
+  }));
+}
+
 export const SKETCH_PREVIEW_RINGS = 20;
 export const SKETCH_BAND_GAP = 1.5; // cm of empty space between stacked bands in the printed layout
 

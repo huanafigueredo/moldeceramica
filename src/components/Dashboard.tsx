@@ -224,6 +224,21 @@ export default function Dashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Called when a hand-drawn top-down outline (asymmetric shapes) from
+  // /desenhar is ready — feeds straight into Prato Orgânico's existing
+  // customPoints pipeline, which already handles arbitrary closed outlines.
+  const handleSketchOutlineComplete = (outlinePoints: { x: number; y: number }[]) => {
+    setShapeType('organic_plate');
+    setOrganicPlateParams((p) => ({
+      ...p,
+      customPoints: outlinePoints,
+      hasLip: true,
+      shrinkage: globalShrinkage,
+    }));
+    goToTab('generator');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Called when an AI searched template is selected
   const handleSelectModel = (selectedShape: ShapeType, selectedParams: any) => {
     // Normalize shape type to avoid casing or spacing issues
@@ -426,7 +441,7 @@ export default function Dashboard() {
           {/* TAB 5: SKETCH-TO-MOLD */}
           {visitedTabs.sketch && (
             <div className={activeTab === 'sketch' ? '' : 'hidden'}>
-              <SketchMoldPage onComplete={handleSketchComplete} />
+              <SketchMoldPage onComplete={handleSketchComplete} onCompleteOutline={handleSketchOutlineComplete} />
             </div>
           )}
 
