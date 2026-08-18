@@ -4,7 +4,7 @@ import { Download, Printer, Layers, Sliders, Check, Settings, Scissors, Sparkles
 import Interactive3DPreview from './Interactive3DPreview';
 import Pattern2DCanvas from './Pattern2DCanvas';
 import { computeOrganicOutline, pointsToPathD, scalePoints } from '../utils/organicShape';
-import { computeBowlBands, BOWL_BAND_GAP } from '../utils/bowlShape';
+import { computeBowlBands, BOWL_BAND_GAP, bandStackHeight } from '../utils/bowlShape';
 import { computeVaseBands, VASE_BAND_GAP } from '../utils/vaseShape';
 import { computeSketchBands, SKETCH_BAND_GAP } from '../utils/sketchShape';
 
@@ -290,7 +290,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
 
       const bands = computeBowlBands(rb_mold, rt_mold, h_mold, p.curvature, seam);
       const bboxW = Math.max(...bands.map((b) => b.bboxW));
-      const bboxH = bands.reduce((sum, b) => sum + b.bboxH, 0) + BOWL_BAND_GAP * (bands.length - 1);
+      const bboxH = bands.reduce((sum, b) => sum + bandStackHeight(b), 0) + BOWL_BAND_GAP * (bands.length - 1);
 
       return {
         type: 'bowl',
@@ -315,7 +315,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
 
       const bands = computeVaseBands(rBase_mold, rShoulder_mold, rNeck_mold, h_mold, shoulderT, p.curvature, seam);
       const bboxW = Math.max(...bands.map((b) => b.bboxW));
-      const bboxH = bands.reduce((sum, b) => sum + b.bboxH, 0) + VASE_BAND_GAP * (bands.length - 1);
+      const bboxH = bands.reduce((sum, b) => sum + bandStackHeight(b), 0) + VASE_BAND_GAP * (bands.length - 1);
 
       return {
         type: 'vase',
@@ -340,7 +340,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
       const bands = computeSketchBands(p.profilePoints, h_mold, maxR_mold, seam);
       const bboxW = bands.length > 0 ? Math.max(...bands.map((b) => b.bboxW)) : 10;
       const bboxH = bands.length > 0
-        ? bands.reduce((sum, b) => sum + b.bboxH, 0) + SKETCH_BAND_GAP * (bands.length - 1)
+        ? bands.reduce((sum, b) => sum + bandStackHeight(b), 0) + SKETCH_BAND_GAP * (bands.length - 1)
         : 10;
 
       return {
@@ -1151,7 +1151,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
               let yCursor = 0;
               return bands.map((band, i) => {
                 const bandOriginY = yCursor;
-                yCursor += (band.bboxH + 1.5) * scale; // BOWL_BAND_GAP in px
+                yCursor += (bandStackHeight(band) + 1.5) * scale; // BOWL_BAND_GAP in px
 
                 if (band.isCylindrical) {
                   const bandW = band.bboxW * scale;
@@ -1175,7 +1175,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                 const L_outer_px = band.L_outer * scale;
                 const L_inner_px = band.L_inner * scale;
                 const apexX = bowlData.bboxW * scale / 2;
-                const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+                const apexY = bandOriginY; // true top of the sector — see bandStackHeight
 
                 const getArcPoint = (r: number, angleRad: number) => {
                   const a = Math.PI / 2 + angleRad;
@@ -1213,7 +1213,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                     {showDimensions && (
                       <text
                         x={apexX}
-                        y={bandOriginY + band.bboxH * scale + 14}
+                        y={bandOriginY + bandStackHeight(band) * scale + 14}
                         className={`${textStyle} text-[9px]`}
                         textAnchor="middle"
                       >
@@ -1240,7 +1240,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
               let yCursor = 0;
               return bands.map((band, i) => {
                 const bandOriginY = yCursor;
-                yCursor += (band.bboxH + 1.5) * scale; // VASE_BAND_GAP in px
+                yCursor += (bandStackHeight(band) + 1.5) * scale; // VASE_BAND_GAP in px
 
                 if (band.isCylindrical) {
                   const bandW = band.bboxW * scale;
@@ -1264,7 +1264,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                 const L_outer_px = band.L_outer * scale;
                 const L_inner_px = band.L_inner * scale;
                 const apexX = vaseData.bboxW * scale / 2;
-                const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+                const apexY = bandOriginY; // true top of the sector — see bandStackHeight
 
                 const getArcPoint = (r: number, angleRad: number) => {
                   const a = Math.PI / 2 + angleRad;
@@ -1302,7 +1302,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                     {showDimensions && (
                       <text
                         x={apexX}
-                        y={bandOriginY + band.bboxH * scale + 14}
+                        y={bandOriginY + bandStackHeight(band) * scale + 14}
                         className={`${textStyle} text-[9px]`}
                         textAnchor="middle"
                       >
@@ -1329,7 +1329,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
               let yCursor = 0;
               return bands.map((band, i) => {
                 const bandOriginY = yCursor;
-                yCursor += (band.bboxH + 1.5) * scale; // SKETCH_BAND_GAP in px
+                yCursor += (bandStackHeight(band) + 1.5) * scale; // SKETCH_BAND_GAP in px
 
                 if (band.isCylindrical) {
                   const bandW = band.bboxW * scale;
@@ -1353,7 +1353,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                 const L_outer_px = band.L_outer * scale;
                 const L_inner_px = band.L_inner * scale;
                 const apexX = sketchData.bboxW * scale / 2;
-                const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+                const apexY = bandOriginY; // true top of the sector — see bandStackHeight
 
                 const getArcPoint = (r: number, angleRad: number) => {
                   const a = Math.PI / 2 + angleRad;
@@ -1391,7 +1391,7 @@ export default function MoldVisualizer({ shapeType, params, onPrintRequest, onCh
                     {showDimensions && (
                       <text
                         x={apexX}
-                        y={bandOriginY + band.bboxH * scale + 14}
+                        y={bandOriginY + bandStackHeight(band) * scale + 14}
                         className={`${textStyle} text-[9px]`}
                         textAnchor="middle"
                       >

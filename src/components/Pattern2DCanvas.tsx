@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
 import { Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { bandStackHeight } from '../utils/bowlShape';
 
 interface Pattern2DCanvasProps {
   shapeType: ShapeType;
@@ -771,7 +772,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     (d.bands as any[]).forEach((band, i) => {
       const bandOriginY = yCursor;
-      yCursor += band.bboxH * scale + BAND_GAP;
+      yCursor += bandStackHeight(band) * scale + BAND_GAP;
 
       if (band.isCylindrical) {
         const bandW = band.bboxW * scale;
@@ -796,7 +797,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       const L_outer_px = band.L_outer * scale;
       const L_inner_px = band.L_inner * scale;
       const apexX = centerX;
-      const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+      const apexY = bandOriginY; // true top of the sector — see bandStackHeight
 
       const getPoint = (r: number, angleRad: number) => {
         const a = Math.PI / 2 + angleRad;
@@ -844,7 +845,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         ctx.fillText(
           `Banda ${i + 1}/${d.bands.length} • Ø ${(band.rBottom * 2).toFixed(1)}→${(band.rTop * 2).toFixed(1)} cm • Geratriz ${band.s.toFixed(1)} cm`,
           apexX,
-          bandOriginY + band.bboxH * scale + 14
+          bandOriginY + bandStackHeight(band) * scale + 14
         );
       }
     });
@@ -874,7 +875,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     (d.bands as any[]).forEach((band, i) => {
       const bandOriginY = yCursor;
-      yCursor += band.bboxH * scale + BAND_GAP;
+      yCursor += bandStackHeight(band) * scale + BAND_GAP;
 
       if (band.isCylindrical) {
         const bandW = band.bboxW * scale;
@@ -899,7 +900,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       const L_outer_px = band.L_outer * scale;
       const L_inner_px = band.L_inner * scale;
       const apexX = centerX;
-      const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+      const apexY = bandOriginY; // true top of the sector — see bandStackHeight
 
       const getPoint = (r: number, angleRad: number) => {
         const a = Math.PI / 2 + angleRad;
@@ -947,7 +948,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         ctx.fillText(
           `Banda ${i + 1}/${d.bands.length} • Ø ${(band.rBottom * 2).toFixed(1)}→${(band.rTop * 2).toFixed(1)} cm • Geratriz ${band.s.toFixed(1)} cm`,
           apexX,
-          bandOriginY + band.bboxH * scale + 14
+          bandOriginY + bandStackHeight(band) * scale + 14
         );
       }
     });
@@ -982,7 +983,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
 
     (d.bands as any[]).forEach((band, i) => {
       const bandOriginY = yCursor;
-      yCursor += band.bboxH * scale + BAND_GAP;
+      yCursor += bandStackHeight(band) * scale + BAND_GAP;
 
       if (band.isCylindrical) {
         const bandW = band.bboxW * scale;
@@ -1007,7 +1008,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
       const L_outer_px = band.L_outer * scale;
       const L_inner_px = band.L_inner * scale;
       const apexX = centerX;
-      const apexY = bandOriginY - L_inner_px * Math.cos(band.total_theta / 2);
+      const apexY = bandOriginY; // true top of the sector — see bandStackHeight
 
       const getPoint = (r: number, angleRad: number) => {
         const a = Math.PI / 2 + angleRad;
@@ -1055,7 +1056,7 @@ export default function Pattern2DCanvas({ shapeType, params, data, showSeam, sho
         ctx.fillText(
           `Banda ${i + 1}/${d.bands.length} • Ø ${(band.rBottom * 2).toFixed(1)}→${(band.rTop * 2).toFixed(1)} cm • Geratriz ${band.s.toFixed(1)} cm`,
           apexX,
-          bandOriginY + band.bboxH * scale + 14
+          bandOriginY + bandStackHeight(band) * scale + 14
         );
       }
     });
