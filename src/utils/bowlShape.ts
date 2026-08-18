@@ -66,6 +66,16 @@ export function frustumBandGeometry(index: number, rBottom: number, rTop: number
   };
 }
 
+// True vertical extent of a printed band, from its topmost point (the
+// sector's apex, which sits ABOVE local y=0 by L_inner*cos(theta/2)) down
+// to its bottommost point (the outer arc, at distance L_outer along the
+// straight-down ray). bboxH alone only covers 0→bottom and silently drops
+// the apex overshoot — fine for a single freestanding Cone, but stacking
+// bands using bboxH lets each band's apex creep up into the previous one.
+export function bandStackHeight(band: BandGeometry): number {
+  return band.isCylindrical ? band.bboxH : band.L_outer;
+}
+
 export const BOWL_PATTERN_BANDS = 6; // pieces to cut & glue for the printed template
 export const BOWL_PREVIEW_RINGS = 18; // finer resolution used only for the smooth 3D preview
 export const BOWL_BAND_GAP = 1.5; // cm of empty space between stacked bands in the printed layout
