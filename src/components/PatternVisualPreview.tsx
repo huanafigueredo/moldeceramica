@@ -583,8 +583,10 @@ export default function PatternVisualPreview({
         </div>
 
         {/* 2D / 3D Segmented View Mode Controller */}
-        <div className="flex bg-clay-50 p-1 rounded-xl border border-terracotta-100/25">
+        <div role="tablist" aria-label="Modo de visualização" className="flex bg-clay-50 p-1 rounded-xl border border-terracotta-100/25">
           <button
+            role="tab"
+            aria-selected={viewMode === '2d'}
             onClick={() => setViewMode('2d')}
             className={`flex-1 py-1.5 rounded-lg text-xs font-sans font-bold transition flex items-center justify-center gap-1.5 ${
               viewMode === '2d'
@@ -596,6 +598,8 @@ export default function PatternVisualPreview({
             Molde Plano (2D)
           </button>
           <button
+            role="tab"
+            aria-selected={viewMode === '3d'}
             onClick={() => setViewMode('3d')}
             className={`flex-1 py-1.5 rounded-lg text-xs font-sans font-bold transition flex items-center justify-center gap-1.5 ${
               viewMode === '3d'
@@ -609,8 +613,10 @@ export default function PatternVisualPreview({
         </div>
 
         {/* Quick Shape Selector Buttons */}
-        <div className="grid grid-cols-3 gap-2 bg-clay-50/50 p-1.5 rounded-xl border border-terracotta-100/30">
+        <div role="tablist" aria-label="Formato da placa" className="grid grid-cols-3 gap-2 bg-clay-50/50 p-1.5 rounded-xl border border-terracotta-100/30">
           <button
+            role="tab"
+            aria-selected={shape === 'circle'}
             onClick={() => setShape('circle')}
             className={`py-1.5 px-2 rounded-lg text-xs font-bold font-sans flex items-center justify-center gap-1.5 transition-all ${
               shape === 'circle'
@@ -621,6 +627,8 @@ export default function PatternVisualPreview({
             <Circle className="w-3.5 h-3.5" /> Placa Redonda
           </button>
           <button
+            role="tab"
+            aria-selected={shape === 'square'}
             onClick={() => setShape('square')}
             className={`py-1.5 px-2 rounded-lg text-xs font-bold font-sans flex items-center justify-center gap-1.5 transition-all ${
               shape === 'square'
@@ -631,6 +639,8 @@ export default function PatternVisualPreview({
             <Square className="w-3.5 h-3.5" /> Placa Quadrada
           </button>
           <button
+            role="tab"
+            aria-selected={shape === 'cylinder_band'}
             onClick={() => setShape('cylinder_band')}
             className={`py-1.5 px-2 rounded-lg text-xs font-bold font-sans flex items-center justify-center gap-1.5 transition-all ${
               shape === 'cylinder_band'
@@ -691,8 +701,10 @@ export default function PatternVisualPreview({
                     <Sliders className="w-3.5 h-3.5 text-terracotta-500" />
                     Estado de Contração 3D
                   </span>
-                  <div className="flex bg-clay-50/50 border border-terracotta-100/30 p-0.5 rounded-lg text-[9px]">
+                  <div role="tablist" aria-label="Estado de contração" className="flex bg-clay-50/50 border border-terracotta-100/30 p-0.5 rounded-lg text-[9px]">
                     <button
+                      role="tab"
+                      aria-selected={state3DMode === 'wet'}
                       onClick={() => setState3DMode('wet')}
                       className={`px-2 py-1 rounded font-bold transition flex items-center gap-1 ${
                         state3DMode === 'wet' ? 'bg-amber-100 text-amber-800 shadow-xs' : 'text-stone-400 hover:text-stone-700'
@@ -702,6 +714,8 @@ export default function PatternVisualPreview({
                       Úmido (100%)
                     </button>
                     <button
+                      role="tab"
+                      aria-selected={state3DMode === 'fired'}
                       onClick={() => setState3DMode('fired')}
                       className={`px-2 py-1 rounded font-bold transition flex items-center gap-1 ${
                         state3DMode === 'fired' ? 'bg-terracotta-500 text-white shadow-xs' : 'text-stone-400 hover:text-stone-700'

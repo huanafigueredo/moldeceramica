@@ -301,9 +301,12 @@ export default function AITemplateFinder({ onSelectModel, globalShrinkage }: AIT
               ) : (
                 <Sparkles className="w-4 h-4" />
               )}
-              Gerar
+              Buscar
             </button>
           </div>
+          <p className="text-[10px] text-clay-900/35 text-center -mt-3">
+            Busca por nome ou palavra-chave no cadastro — tente termos simples como "caneca" ou "tigela" em vez de uma frase inteira.
+          </p>
 
           <div className="flex flex-wrap items-center gap-2 justify-center">
             {SUGGESTIONS.map((s, idx) => (

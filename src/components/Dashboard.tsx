@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShapeType, CylinderParams, ConeParams, TrayParams, NapkinHolderParams, BoxParams, OrganicPlateParams, BowlParams, VaseParams, SketchParams } from '../types';
-import RetractionCalculator from './RetractionCalculator';
 import ParametricMolds from './ParametricMolds';
 import MoldVisualizer from './MoldVisualizer';
 import PrintTiledLayout from './PrintTiledLayout';
 import AITemplateFinder from './AITemplateFinder';
 import SketchMoldPage from './SketchMoldPage';
 import AppHeader from './AppHeader';
-import { Flame, Layers, Calculator, Info, Compass, ArrowRight } from 'lucide-react';
+import { Flame, Layers, Calculator, Info, Compass, ArrowRight, Loader2 } from 'lucide-react';
+
+// RetractionCalculator pulls in PatternVisualPreview -> Slab3DPreview, which
+// statically imports three.js/@react-three/fiber/@react-three/drei — a large
+// chunk that has nothing to do with the main /moldes mold generator most
+// visits use. Loading it lazily keeps that weight out of the initial bundle
+// for everyone who never opens the "Calculadoras" tab.
+const RetractionCalculator = lazy(() => import('./RetractionCalculator'));
 
 const PATH_TO_TAB: Record<string, 'overview' | 'generator' | 'search' | 'calculator' | 'sketch'> = {
   '/': 'overview',
@@ -334,7 +340,7 @@ export default function Dashboard() {
                     </div>
                     <h3 className="font-serif text-xl font-bold text-clay-900 mb-2">Gerador de Moldes</h3>
                     <p className="text-xs text-clay-900/50 leading-relaxed max-w-xs">
-                      Gere gabaritos 2D técnicos para formas cilíndricas, cônicas e prismáticas com compensação de queima.
+                      Escolha uma forma, ajuste as medidas e saia com o molde planificado pronto pra imprimir e cortar.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold text-terracotta-500">
@@ -351,9 +357,9 @@ export default function Dashboard() {
                     <div className="p-3 bg-indigo-50 rounded-xl text-indigo-500 w-fit mb-6">
                       <Compass className="w-5 h-5" />
                     </div>
-                    <h3 className="font-serif text-lg font-bold text-clay-900 mb-2">Biblioteca AI</h3>
+                    <h3 className="font-serif text-lg font-bold text-clay-900 mb-2">Biblioteca</h3>
                     <p className="text-[11px] text-clay-900/50 leading-relaxed">
-                      Padrões e medidas de referência para peças clássicas.
+                      Busque um formato parecido com o que quer fazer e carregue as medidas prontas.
                     </p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-1 transition-transform" />
@@ -452,11 +458,19 @@ export default function Dashboard() {
           {/* TAB 4: RETRACTION ASSISTANT */}
           {visitedTabs.calculator && (
             <div className={activeTab === 'calculator' ? '' : 'hidden'}>
-              <RetractionCalculator
-                globalShrinkage={globalShrinkage}
-                setGlobalShrinkage={handleSetGlobalShrinkage}
-                onPrintRequest={(svg, bbox) => setPrintRequest({ svgString: svg, boundingBox: bbox })}
-              />
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-24 text-clay-900/30">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  </div>
+                }
+              >
+                <RetractionCalculator
+                  globalShrinkage={globalShrinkage}
+                  setGlobalShrinkage={handleSetGlobalShrinkage}
+                  onPrintRequest={(svg, bbox) => setPrintRequest({ svgString: svg, boundingBox: bbox })}
+                />
+              </Suspense>
             </div>
           )}
 
