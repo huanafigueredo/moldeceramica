@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { Flame, Lock, AlertTriangle, Loader2 } from 'lucide-react';
-import { signInAdmin } from '../lib/adminAuth';
+import { signInAdmin, useAdminSession } from '../lib/adminAuth';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { session, loading: sessionLoading } = useAdminSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (sessionLoading) {
+    return (
+      <div className="min-h-screen bg-clay-50 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-terracotta-500" />
+      </div>
+    );
+  }
+
+  if (session) {
+    return <Navigate to="/admin" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

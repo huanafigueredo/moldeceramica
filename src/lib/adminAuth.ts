@@ -8,7 +8,8 @@ export async function signInAdmin(email: string, password: string) {
 }
 
 export async function signOutAdmin() {
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  return error;
 }
 
 // Tracks whether a Supabase session is currently active. Being logged in at

@@ -100,6 +100,27 @@ export default function AdminPage() {
   const [tab, setTab] = useState<AdminTab>(
     requestedTab && VALID_TABS.includes(requestedTab) ? requestedTab : 'moldes'
   );
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
+
+  useEffect(() => {
+    if (requestedTab && VALID_TABS.includes(requestedTab)) {
+      setTab(requestedTab);
+    }
+  }, [requestedTab]);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setSignOutError(false);
+    const error = await signOutAdmin();
+    // On success the auth listener flips `session` to null and this page
+    // unmounts (redirected to /admin/login); only reset on failure so the
+    // button doesn't get stuck disabled if sign-out actually errors.
+    if (error) {
+      setSignOutError(true);
+      setSigningOut(false);
+    }
+  };
 
   if (sessionLoading) {
     return (
@@ -124,12 +145,16 @@ export default function AdminPage() {
             <span className="font-serif text-lg font-bold text-clay-900">Painel Admin</span>
           </div>
           <div className="flex items-center gap-4">
+            {signOutError && (
+              <span className="text-[11px] text-red-600">Não foi possível sair. Tente de novo.</span>
+            )}
             <Link to="/" className="text-xs text-clay-900/50 hover:text-clay-900/80">← Ver o site</Link>
             <button
-              onClick={() => signOutAdmin()}
-              className="flex items-center gap-1.5 text-xs font-bold text-clay-900/60 hover:text-red-600 transition"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="flex items-center gap-1.5 text-xs font-bold text-clay-900/60 hover:text-red-600 disabled:opacity-50 transition"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              {signingOut ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
               Sair
             </button>
           </div>
@@ -168,14 +193,20 @@ function TabButton({ active, onClick, icon: Icon, label }: { active: boolean; on
 function SavedMoldsModeration() {
   const [rows, setRows] = useState<SavedMoldRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchRows = async () => {
     setLoading(true);
-    const { data } = await supabase
+    setError(null);
+    const { data, error: fetchError } = await supabase
       .from('saved_molds')
       .select('id, name, shape_type, created_at')
       .order('created_at', { ascending: false });
-    setRows(data || []);
+    if (fetchError) {
+      setError('Não foi possível carregar os moldes salvos.');
+    } else {
+      setRows(data || []);
+    }
     setLoading(false);
   };
 
@@ -184,14 +215,26 @@ function SavedMoldsModeration() {
   }, []);
 
   const handleDelete = async (id: string) => {
+    const prevRows = rows;
     setRows((prev) => prev.filter((r) => r.id !== id));
-    await supabase.from('saved_molds').delete().eq('id', id);
+    const { error: deleteError } = await supabase.from('saved_molds').delete().eq('id', id);
+    if (deleteError) {
+      setRows(prevRows);
+      setError('Não foi possível apagar esse molde.');
+    }
   };
 
   return (
     <div className="bg-white rounded-3xl border border-terracotta-100 p-6 shadow-sm">
       <h2 className="font-serif text-lg font-bold text-clay-900 mb-1">Moldes Salvos pelo Público</h2>
       <p className="text-xs text-clay-900/50 mb-6">Qualquer pessoa pode ver e carregar esses moldes; só você pode apagar.</p>
+
+      {error && (
+        <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 mb-4">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-clay-900/30" /></div>
@@ -225,14 +268,20 @@ function SavedMoldsModeration() {
 function SuggestionsInbox() {
   const [rows, setRows] = useState<SuggestionRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchRows = async () => {
     setLoading(true);
-    const { data } = await supabase
+    setError(null);
+    const { data, error: fetchError } = await supabase
       .from('suggestions')
       .select('*')
       .order('created_at', { ascending: false });
-    setRows(data || []);
+    if (fetchError) {
+      setError('Não foi possível carregar as sugestões.');
+    } else {
+      setRows(data || []);
+    }
     setLoading(false);
   };
 
@@ -242,18 +291,34 @@ function SuggestionsInbox() {
 
   const toggleRead = async (row: SuggestionRow) => {
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_read: !r.is_read } : r)));
-    await supabase.from('suggestions').update({ is_read: !row.is_read }).eq('id', row.id);
+    const { error: updateError } = await supabase.from('suggestions').update({ is_read: !row.is_read }).eq('id', row.id);
+    if (updateError) {
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_read: row.is_read } : r)));
+      setError('Não foi possível atualizar essa sugestão.');
+    }
   };
 
   const handleDelete = async (id: string) => {
+    const prevRows = rows;
     setRows((prev) => prev.filter((r) => r.id !== id));
-    await supabase.from('suggestions').delete().eq('id', id);
+    const { error: deleteError } = await supabase.from('suggestions').delete().eq('id', id);
+    if (deleteError) {
+      setRows(prevRows);
+      setError('Não foi possível apagar essa sugestão.');
+    }
   };
 
   return (
     <div className="bg-white rounded-3xl border border-terracotta-100 p-6 shadow-sm">
       <h2 className="font-serif text-lg font-bold text-clay-900 mb-1">Sugestões Recebidas</h2>
       <p className="text-xs text-clay-900/50 mb-6">Enviadas pela página pública /sugestoes.</p>
+
+      {error && (
+        <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 mb-4">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-clay-900/30" /></div>

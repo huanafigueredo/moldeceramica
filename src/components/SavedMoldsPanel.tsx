@@ -80,8 +80,13 @@ export default function SavedMoldsPanel({ shapeType, params, onLoad }: SavedMold
   };
 
   const handleDelete = async (id: string) => {
+    const prevMolds = molds;
     setMolds((prev) => prev.filter((m) => m.id !== id));
-    await supabase.from('saved_molds').delete().eq('id', id);
+    const { error: deleteError } = await supabase.from('saved_molds').delete().eq('id', id);
+    if (deleteError) {
+      setMolds(prevMolds);
+      setError('Não foi possível apagar esse molde.');
+    }
   };
 
   return (
