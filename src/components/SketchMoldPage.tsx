@@ -25,7 +25,9 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 400, height: 480 });
-  const [rawPoints, setRawPoints] = useState<RawPoint[]>([]);
+  // Multiple pointer-down-to-up strokes accumulate here — lifting the
+  // finger/mouse to continue drawing must NOT erase what came before.
+  const [strokes, setStrokes] = useState<RawPoint[][]>([]);
   const [cleanedProfile, setCleanedProfile] = useState<ProfilePoint[] | null>(null);
   const [cleanedOutline, setCleanedOutline] = useState<RawPoint[] | null>(null); // pixel-space, for the preview draw
   const [intensity, setIntensity] = useState(50); // 0-100, maps to Douglas-Peucker epsilon
@@ -44,11 +46,12 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
   }, []);
 
   const axisX = dimensions.width * AXIS_X_FRACTION;
+  const allPoints = strokes.flat();
 
   const handleModeChange = (m: Mode) => {
     if (m === mode) return;
     setMode(m);
-    setRawPoints([]);
+    setStrokes([]);
     setCleanedProfile(null);
     setCleanedOutline(null);
   };
@@ -64,13 +67,19 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
     isDrawing.current = true;
     setCleanedProfile(null);
     setCleanedOutline(null);
-    setRawPoints([getRelativePoint(e)]);
+    // Start a new stroke without touching the ones already drawn.
+    setStrokes((prev) => [...prev, [getRelativePoint(e)]]);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing.current) return;
     e.preventDefault();
-    setRawPoints((prev) => [...prev, getRelativePoint(e)]);
+    const point = getRelativePoint(e);
+    setStrokes((prev) => {
+      const next = prev.slice();
+      next[next.length - 1] = [...next[next.length - 1], point];
+      return next;
+    });
   };
 
   const handlePointerUp = () => {
@@ -78,21 +87,21 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
   };
 
   const handleClear = () => {
-    setRawPoints([]);
+    setStrokes([]);
     setCleanedProfile(null);
     setCleanedOutline(null);
   };
 
   const handleImprove = () => {
-    if (rawPoints.length < 3) return;
+    if (allPoints.length < 3) return;
     // Intensity 0-100 maps to an epsilon in pixels: higher intensity = more
     // aggressive simplification = straighter, simpler lines, fewer bands/vertices.
     const epsilon = 2 + (intensity / 100) * 22;
     if (mode === 'profile') {
-      const simplified = simplifyPath(rawPoints, epsilon);
+      const simplified = simplifyPath(allPoints, epsilon);
       setCleanedProfile(rawPointsToProfile(simplified, axisX));
     } else {
-      const simplified = simplifyClosedPath(rawPoints, epsilon);
+      const simplified = simplifyClosedPath(allPoints, epsilon);
       setCleanedOutline(simplified);
     }
   };
@@ -166,27 +175,28 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
       ctx.fillText('cada quadrado = 5cm', 8, h - 10);
     }
 
-    // Raw stroke
-    if (rawPoints.length > 1) {
-      const hasCleaned = mode === 'profile' ? !!cleanedProfile : !!cleanedOutline;
+    // Raw strokes — each drawn as its own separate polyline, so lifting the
+    // pointer between strokes never draws a spurious connecting line.
+    const hasCleaned = mode === 'profile' ? !!cleanedProfile : !!cleanedOutline;
+    strokes.forEach((stroke) => {
+      if (stroke.length < 2) return;
       ctx.strokeStyle = hasCleaned ? 'rgba(23,23,26,0.15)' : '#17171a';
       ctx.lineWidth = hasCleaned ? 2 : 3;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.moveTo(rawPoints[0].x, rawPoints[0].y);
-      rawPoints.slice(1).forEach((p) => ctx.lineTo(p.x, p.y));
-      if (mode === 'outline') ctx.closePath();
+      ctx.moveTo(stroke[0].x, stroke[0].y);
+      stroke.slice(1).forEach((p) => ctx.lineTo(p.x, p.y));
       ctx.stroke();
-    }
+    });
 
     if (mode === 'profile' && cleanedProfile && cleanedProfile.length > 1) {
       // Cleaned/straightened silhouette, mirrored across the axis for a full vessel preview
-      const ys = rawPoints.map((p) => p.y);
+      const ys = allPoints.map((p) => p.y);
       const minY = Math.min(...ys);
       const maxY = Math.max(...ys);
       const toCanvasY = (t: number) => maxY - t * (maxY - minY);
-      const rToPx = (r: number) => r * (Math.max(...rawPoints.map((p) => p.x - axisX), 40));
+      const rToPx = (r: number) => r * (Math.max(...allPoints.map((p) => p.x - axisX), 40));
 
       const rightPts = cleanedProfile.map((p) => ({ x: axisX + rToPx(p.r), y: toCanvasY(p.t) }));
 
@@ -234,7 +244,7 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
         ctx.fill();
       });
     }
-  }, [dimensions, rawPoints, cleanedProfile, cleanedOutline, mode, axisX]);
+  }, [dimensions, strokes, allPoints, cleanedProfile, cleanedOutline, mode, axisX]);
 
   useEffect(() => {
     draw();
@@ -265,11 +275,13 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
               {mode === 'profile' ? (
                 <>
                   Desenhe o <b>contorno lateral</b> da peça (metade do perfil, como se cortasse ela ao meio), encostando no eixo central à esquerda.
+                  Pode desenhar em vários traços — tudo que você desenhar fica na tela até apertar "Limpar".
                   Funciona bem pra formas redondas: canecas, vasos, tigelas, porta-filtro de café.
                 </>
               ) : (
                 <>
                   Desenhe o <b>contorno visto de cima</b> da peça, o formato completo — feche a linha voltando perto de onde começou.
+                  Pode desenhar em vários traços — tudo que você desenhar fica na tela até apertar "Limpar".
                   Funciona bem pra bandejas, pratos e formas livres/assimétricas.
                 </>
               )}{' '}
@@ -338,7 +350,7 @@ export default function SketchMoldPage({ onComplete, onCompleteOutline }: Sketch
 
           <button
             onClick={handleImprove}
-            disabled={rawPoints.length < 3}
+            disabled={allPoints.length < 3}
             className="px-5 py-2.5 bg-terracotta-500 hover:bg-terracotta-600 disabled:opacity-40 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm shadow-terracotta-500/10"
           >
             <Wand2 className="w-3.5 h-3.5" />
