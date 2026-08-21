@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Dashboard from './components/Dashboard';
 import SuggestionsPage from './components/SuggestionsPage';
 import AdminLogin from './components/AdminLogin';
@@ -22,6 +23,7 @@ export default function App() {
             scratch and loses in-progress work. */}
         <Route path="/*" element={<Dashboard />} />
       </Routes>
+      <Analytics />
     </BrowserRouter>
   );
 }
